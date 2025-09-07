@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="16" styleClass="card"
+      fx:controller="org.cerveza.cerveza.controller.MarcaFormController">
+    <children>
+        <Label text="Marcas" styleClass="h1"/>
+        <GridPane hgap="10" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="70"/>
+            </columnConstraints>
+
+            <Label text="ID Fabricante" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtIdFabricante" promptText="1" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Nombre" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtNombre" promptText="Corona" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Descripción" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextArea fx:id="txtDescripcion" prefRowCount="3" promptText="Marca premium mexicana"
+                      GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Nuevo" onAction="#onNuevo" fx:id="btnNuevo"/>
+            <Button text="Guardar" onAction="#onGuardar" fx:id="btnGuardar"/>
+            <Button text="Eliminar" onAction="#onEliminar" fx:id="btnEliminar"/>
+        </HBox>
+
+        <TableView fx:id="tblMarcas" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="colIdFabricante" text="Fabricante" prefWidth="100"/>
+                <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
+                <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="320"/>
+            </columns>
+        </TableView>
+    </children>
+</VBox>

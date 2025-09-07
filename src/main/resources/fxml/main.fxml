@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="org.cerveza.cerveza.controller.MainController">
+    <top>
+        <VBox>
+            <MenuBar>
+                <menus>
+                    <Menu text="Archivo">
+                        <MenuItem onAction="#onSalir" text="Salir" />
+                    </Menu>
+                    <Menu text="Catálogos">
+                        <MenuItem onAction="#openCervezaForm" text="Cervezas" />
+                        <MenuItem onAction="#openMarcaForm" text="Marcas" />
+                        <MenuItem onAction="#openEnvaseForm" text="Envases" />
+                    </Menu>
+                    <Menu text="Ayuda">
+                        <MenuItem onAction="#onAcercaDe" text="Acerca de" />
+                    </Menu>
+                </menus>
+            </MenuBar>
+            <ToolBar>
+                <Button onAction="#openCervezaForm" text="Cervezas" />
+                <Button onAction="#openMarcaForm" text="Marcas" />
+                <Button onAction="#openEnvaseForm" text="Envases" />
+            <Button layoutX="136.0" layoutY="10.0" onAction="#openProduccionForm" text="Producción" />
+                <Separator />
+                <Label styleClass="brand" text="MyDB" />
+            </ToolBar>
+        </VBox>
+    </top>
+
+
+    <center>
+        <StackPane fx:id="contentPane">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <children>
+                <Label styleClass="muted" text="Selecciona un módulo del menú superior" />
+            </children>
+        </StackPane>
+
+    </center>
+</BorderPane>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.cerveza.cerveza.controller.CervezaFormController">
+    <children>
+        <VBox spacing="16.0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="card">
+            <Label text="Cervezas" styleClass="h1"/>
+            <GridPane hgap="10" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="30"/>
+                    <ColumnConstraints percentWidth="70"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30"/>
+                </rowConstraints>
+
+
+                <Label text="Marca (ID)" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtIdMarca" promptText="ej. 1" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+
+                <Label text="Nombre" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtNombre" promptText="Corona Extra" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+
+                <Label text="Aspecto" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtAspecto" promptText="Rubia / Ámbar" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+
+                <Label text="Procedimientos" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextArea fx:id="txtProcedimientos" prefRowCount="3" promptText="Fermentación baja..." GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+
+                <Label text="Graduación (%)" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtGraduacion" promptText="4.5" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            </GridPane>
+
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Nuevo" onAction="#onNuevo"/>
+                <Button text="Guardar" onAction="#onGuardar" fx:id="btnGuardar"/>
+                <Button text="Limpiar" onAction="#onLimpiar"/>
+            </HBox>
+
+
+            <TableView fx:id="tblCervezas" prefHeight="300">
+                <columns>
+                    <TableColumn text="ID" fx:id="colId" prefWidth="60"/>
+                    <TableColumn text="Marca" fx:id="colIdMarca" prefWidth="80"/>
+                    <TableColumn text="Nombre" fx:id="colNombre" prefWidth="200"/>
+                    <TableColumn text="Aspecto" fx:id="colAspecto" prefWidth="120"/>
+                    <TableColumn text="Graduación" fx:id="colGraduacion" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </children>
+</AnchorPane>
