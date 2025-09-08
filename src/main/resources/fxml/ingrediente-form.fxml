@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.cerveza.cerveza.controller.IngredienteFormController">
+    <children>
+        <Pane prefHeight="400.0" prefWidth="600.0">
+            <children>
+                <Label layoutX="14.0" layoutY="44.0" text="ID ingrediente" />
+                <Label layoutX="14.0" layoutY="14.0" text="Ingrediente" />
+                <Label layoutX="14.0" layoutY="77.0" text="Nombre" />
+                <Label layoutX="13.0" layoutY="125.0" text="Descripción" />
 
+                <TextField fx:id="txtIdIngrediente" layoutX="109.0" layoutY="40.0"
+                           prefHeight="25.0" prefWidth="223.0" />
+                <TextField fx:id="txtNombre" layoutX="109.0" layoutY="73.0"
+                           prefHeight="25.0" prefWidth="223.0" />
+                <TextArea fx:id="txtDescripcion" layoutX="109.0" layoutY="103.0"
+                          prefHeight="61.0" prefWidth="223.0" />
+
+                <TableView fx:id="tblIngredientes" layoutX="14.0" layoutY="186.0"
+                           prefHeight="200.0" prefWidth="569.0">
+                    <columns>
+                        <TableColumn fx:id="colId" prefWidth="90.0" text="ID" />
+                        <TableColumn fx:id="colNombre" prefWidth="125.0" text="Nombre" />
+                        <TableColumn fx:id="colDescripcion" prefWidth="352.0" text="Descripción" />
+                    </columns>
+                </TableView>
+
+                <Button fx:id="btnNuevo" layoutX="368.0" layoutY="40.0"
+                        mnemonicParsing="false" prefHeight="25.0" prefWidth="59.0"
+                        onAction="#nnew" text="Nuevo" />
+                <Button fx:id="btnGuardar" layoutX="368.0" layoutY="73.0"
+                        mnemonicParsing="false" onAction="#save" text="Guardar" />
+                <Button fx:id="btnEliminar" layoutX="368.0" layoutY="121.0"
+                        mnemonicParsing="false" onAction="#delete" text="Eliminar" />
+            </children>
+        </Pane>
+    </children>
 </AnchorPane>
