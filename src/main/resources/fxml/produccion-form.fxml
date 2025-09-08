@@ -1,68 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.cerveza.cerveza.controller.ProduccionFormController">
-    <top>
-        <VBox spacing="8" BorderPane.alignment="CENTER">
-            <children>
-                <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Producción" />
-                <GridPane hgap="10" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints halignment="RIGHT" minWidth="120" />
-                        <ColumnConstraints hgrow="ALWAYS" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints valignment="CENTER" />
-                        <RowConstraints valignment="CENTER" />
-                        <RowConstraints valignment="CENTER" />
-                        <RowConstraints valignment="CENTER" />
-                    </rowConstraints>
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="16" styleClass="card"
+      fx:controller="org.cerveza.cerveza.controller.ProduccionFormController">
+    <children>
+        <Label text="Producción" styleClass="h1"/>
 
-                    <padding>
-                        <Insets bottom="0" left="10" right="10" top="10" />
-                    </padding>
+        <GridPane hgap="10" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="70"/>
+            </columnConstraints>
 
-                    <children>
-                        <Label text="Cerveza:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <ComboBox fx:id="cbCerveza" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Label text="Cerveza" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cbCerveza" promptText="Elige la cerveza"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                        <Label text="Fecha:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                        <DatePicker fx:id="dpFecha" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Fecha" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpFecha" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <Label text="Cantidad:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtCantidad" promptText="Ej. 1000" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Cantidad" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtCantidad" promptText="Ej. 100"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        </GridPane>
 
-                        <Label text="Lote:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                        <TextField fx:id="txtLote" promptText="Opcional" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                    </children>
-                </GridPane>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Nuevo"   fx:id="btnNuevo"   onAction="#onNuevo"/>
+            <Button text="Guardar" fx:id="btnGuardar" onAction="#onGuardar"/>
+            <Button text="Eliminar" fx:id="btnEliminar" onAction="#onEliminar"/>
+        </HBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 10 10 10;">
-                    <children>
-                        <Button fx:id="btnNuevo" onAction="#onNuevo" text="Nuevo" />
-                        <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
-                        <Button fx:id="btnEliminar" onAction="#onEliminar" text="Eliminar" />
-                        <Button fx:id="btnRefrescar" onAction="#onRefrescar" text="Refrescar" />
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
-    </top>
-
-    <center>
-        <TableView fx:id="tblProduccion" prefHeight="400" prefWidth="700" BorderPane.alignment="CENTER">
+        <TableView fx:id="tblProduccion" prefHeight="300">
             <columns>
-                <TableColumn fx:id="colId" prefWidth="70" text="ID" />
-                <TableColumn fx:id="colCerveza" prefWidth="200" text="Cerveza" />
-                <TableColumn fx:id="colFecha" prefWidth="120" text="Fecha" />
-                <TableColumn fx:id="colCantidad" prefWidth="120" text="Cantidad" />
+                <TableColumn fx:id="colId"        text="ID"        prefWidth="60"/>
+                <TableColumn fx:id="colCerveza"   text="Cerveza"   prefWidth="200"/>
+                <TableColumn fx:id="colFecha"     text="Fecha"     prefWidth="140"/>
+                <TableColumn fx:id="colCantidad"  text="Cantidad"  prefWidth="120"/>
             </columns>
-            <padding>
-                <Insets bottom="10" left="10" right="10" top="0" />
-            </padding>
         </TableView>
-    </center>
-</BorderPane>
+    </children>
+</VBox>

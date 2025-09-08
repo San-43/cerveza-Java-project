@@ -26,7 +26,7 @@
                 <Button onAction="#openCervezaForm" text="Cervezas" />
                 <Button onAction="#openMarcaForm" text="Marcas" />
                 <Button onAction="#openEnvaseForm" text="Envases" />
-            <Button layoutX="136.0" layoutY="10.0" onAction="#openProduccionForm" text="Producción" />
+                <Button onAction="#openProduccionForm" text="Producción" />
                 <Separator />
                 <Label styleClass="brand" text="MyDB" />
             </ToolBar>

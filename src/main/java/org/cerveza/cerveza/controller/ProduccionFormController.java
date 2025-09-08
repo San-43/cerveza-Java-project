@@ -1,143 +1,184 @@
 package org.cerveza.cerveza.controller;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
-import org.cerveza.cerveza.dao.CervezaDao;
 import org.cerveza.cerveza.dao.ProduccionDao;
-import org.cerveza.cerveza.dao.impl.CervezaDaoImpl;
 import org.cerveza.cerveza.dao.impl.ProduccionDaoImpl;
-import org.cerveza.cerveza.model.Cerveza;
 import org.cerveza.cerveza.model.Produccion;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
+
+import static org.cerveza.cerveza.config.Database.getConnection;
 
 public class ProduccionFormController {
 
-    // Tabla
-    @FXML private TableView<Produccion> tblProduccion;
-    @FXML private TableColumn<Produccion, Integer> colId;
-    @FXML private TableColumn<Produccion, String> colCerveza;
-    @FXML private TableColumn<Produccion, LocalDate> colFecha;
-    @FXML private TableColumn<Produccion, Integer> colCantidad;
-    @FXML private TableColumn<Produccion, String> colLote;
-
-    // Formulario
-    @FXML private ComboBox<Cerveza> cbCerveza;
+    @FXML private ComboBox<CervezaItem> cbCerveza;
     @FXML private DatePicker dpFecha;
     @FXML private TextField txtCantidad;
-    @FXML private TextField txtLote;
-    @FXML private Button btnGuardar;
-    @FXML private Button btnNuevo;
-    @FXML private Button btnEliminar;
-    @FXML private Button btnRefrescar;
 
-    private final ProduccionDao produccionDAO = new ProduccionDaoImpl();
-    private final CervezaDao cervezaDAO = new CervezaDaoImpl(); // Se asume existente
+    @FXML private TableView<Produccion> tblProduccion;
+    @FXML private TableColumn<Produccion, Number> colId;
+    @FXML private TableColumn<Produccion, String> colCerveza;
+    @FXML private TableColumn<Produccion, LocalDate> colFecha;
+    @FXML private TableColumn<Produccion, Number> colCantidad;
+
+    @FXML private Button btnNuevo;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnEliminar;
+
+    private final ProduccionDao dao = new ProduccionDaoImpl();
     private final ObservableList<Produccion> data = FXCollections.observableArrayList();
-    private Produccion editing; // null = inserción
+    private final ObservableList<CervezaItem> cervezas = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // columnas
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colCerveza.setCellValueFactory(new PropertyValueFactory<>("cervezaNombre"));
-        colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
-        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-        colLote.setCellValueFactory(new PropertyValueFactory<>("lote"));
+        // Tabla
+        colId.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()));
+        colCerveza.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCervezaNombre()));
+        colFecha.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getFecha()));
+        colCantidad.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCantidad()));
+        tblProduccion.setItems(data);
 
-        // combos
-        cbCerveza.setItems(FXCollections.observableArrayList(cervezaDAO.findAll()));
+        // Combo Cerveza (carga directa desde tabla "cerveza")
+        cbCerveza.setItems(cervezas);
         cbCerveza.setConverter(new StringConverter<>() {
-            @Override public String toString(Cerveza c) { return c == null ? "" : c.getNombre(); }
-            @Override public Cerveza fromString(String s) { return null; }
+            @Override public String toString(CervezaItem item) { return item == null ? "" : item.nombre; }
+            @Override public CervezaItem fromString(String s) { return null; }
         });
 
-        // tabla
-        tblProduccion.setItems(data);
-        tblProduccion.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> loadToForm(sel));
+        cargarCervezas();
+        refrescarTabla();
 
-        dpFecha.setValue(LocalDate.now());
-        refresh();
-    }
+        // Al seleccionar fila, poblar formulario
+        tblProduccion.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                seleccionarEnCombo(sel.getCervezaId());
+                dpFecha.setValue(sel.getFecha());
+                txtCantidad.setText(String.valueOf(sel.getCantidad()));
+            }
+        });
 
-    private void loadToForm(Produccion p) {
-        if (p == null) return;
-        this.editing = p;
-        // seleccionar cerveza por id
-        cbCerveza.getItems().stream()
-                .filter(c -> c.getId().equals(p.getCervezaId()))
-                .findFirst().ifPresent(cbCerveza::setValue);
-        dpFecha.setValue(p.getFecha());
-        txtCantidad.setText(String.valueOf(p.getCantidad()));
-        txtLote.setText(p.getLote() == null ? "" : p.getLote());
+        // Estado inicial
+        limpiarForm();
     }
 
     @FXML
     public void onNuevo() {
-        editing = null;
-        cbCerveza.setValue(null);
-        dpFecha.setValue(LocalDate.now());
-        txtCantidad.clear();
-        txtLote.clear();
         tblProduccion.getSelectionModel().clearSelection();
+        limpiarForm();
     }
 
     @FXML
     public void onGuardar() {
         try {
-            Cerveza c = cbCerveza.getValue();
-            if (c == null) throw new IllegalArgumentException("Selecciona una cerveza");
-            int cantidad = Integer.parseInt(txtCantidad.getText().trim());
+            CervezaItem item = cbCerveza.getValue();
+            if (item == null) throw new IllegalArgumentException("Selecciona una cerveza.");
             LocalDate fecha = dpFecha.getValue();
-            String lote = txtLote.getText().isBlank() ? null : txtLote.getText().trim();
+            if (fecha == null) throw new IllegalArgumentException("Selecciona una fecha.");
+            int cantidad = Integer.parseInt(txtCantidad.getText().trim());
+            if (cantidad <= 0) throw new IllegalArgumentException("La cantidad debe ser > 0.");
 
-            if (editing == null) {
-                Produccion p = new Produccion(null, c.getId(), c.getNombre(), fecha, cantidad, lote);
-                produccionDAO.insert(p);
-            } else {
-                editing.setCervezaId(c.getId());
-                editing.setCervezaNombre(c.getNombre());
-                editing.setFecha(fecha);
-                editing.setCantidad(cantidad);
-                editing.setLote(lote);
-                produccionDAO.update(editing);
+            Produccion sel = tblProduccion.getSelectionModel().getSelectedItem();
+            if (sel == null) { // INSERT
+                Produccion p = new Produccion(null, item.id, fecha, cantidad, item.nombre);
+                dao.insert(p);
+                data.addFirst(p);
+                tblProduccion.getSelectionModel().select(p);
+            } else { // UPDATE
+                sel.setCervezaId(item.id);
+                sel.setCervezaNombre(item.nombre);
+                sel.setFecha(fecha);
+                sel.setCantidad(cantidad);
+                dao.update(sel);
+                tblProduccion.refresh();
             }
-            refresh();
-            onNuevo();
+
+            limpiarForm();
         } catch (NumberFormatException nfe) {
-            showError("Cantidad inválida (usa números enteros).");
+            error("Cantidad inválida", "Escribe un número entero para cantidad.");
         } catch (Exception ex) {
-            showError(ex.getMessage());
+            error("No se pudo guardar", ex.getMessage());
         }
     }
 
     @FXML
     public void onEliminar() {
         Produccion sel = tblProduccion.getSelectionModel().getSelectedItem();
-        if (sel == null) { showError("Selecciona un registro."); return; }
+        if (sel == null) return;
+        if (!confirm("¿Eliminar el registro seleccionado?")) return;
+
         try {
-            produccionDAO.delete(sel.getId());
-            refresh();
-            onNuevo();
+            if (dao.delete(sel.getId())) {
+                data.remove(sel);
+                limpiarForm();
+            }
         } catch (Exception ex) {
-            showError(ex.getMessage());
+            error("No se pudo eliminar", ex.getMessage());
         }
     }
 
-    @FXML
-    public void onRefrescar() { refresh(); }
+    /* -------------------- helpers -------------------- */
 
-    private void refresh() {
-        data.setAll(produccionDAO.findAll());
+    private void limpiarForm() {
+        cbCerveza.getSelectionModel().clearSelection();
+        dpFecha.setValue(LocalDate.now());
+        txtCantidad.clear();
+        btnEliminar.setDisable(tblProduccion.getSelectionModel().getSelectedItem() == null);
     }
 
-    private void showError(String msg) {
-        Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        a.setHeaderText("Error");
+    private void refrescarTabla() {
+        try {
+            data.setAll(dao.findAll());
+        } catch (Exception ex) {
+            error("No se pudo cargar Producción", ex.getMessage());
+        }
+    }
+
+    private void cargarCervezas() {
+        cervezas.clear();
+        String sql = "SELECT idcerveza, nombre FROM cerveza ORDER BY nombre";
+        try (Connection cn = getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                cervezas.add(new CervezaItem(rs.getInt("idcerveza"), rs.getString("nombre")));
+            }
+        } catch (Exception ex) {
+            error("No se pudieron cargar cervezas", ex.getMessage());
+        }
+    }
+
+    private void seleccionarEnCombo(Integer cervezaId) {
+        if (cervezaId == null) { cbCerveza.getSelectionModel().clearSelection(); return; }
+        for (CervezaItem it : cervezas) {
+            if (it.id == cervezaId) { cbCerveza.getSelectionModel().select(it); return; }
+        }
+    }
+
+    private void error(String header, String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setHeaderText(header);
+        a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private boolean confirm(String msg) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, msg, ButtonType.OK, ButtonType.CANCEL);
+        a.setHeaderText("Confirmar");
+        return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+    }
+
+    /* Item simple para el ComboBox */
+    public static class CervezaItem {
+        final int id; final String nombre;
+        public CervezaItem(int id, String nombre) { this.id = id; this.nombre = nombre; }
+        @Override public String toString() { return nombre; }
     }
 }

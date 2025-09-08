@@ -4,8 +4,10 @@ import org.cerveza.cerveza.model.Produccion;
 import java.util.List;
 
 public interface ProduccionDao {
-    List<Produccion> findAll();
-    void insert(Produccion p);
-    void update(Produccion p);
-    void delete(int id);
+    Produccion insert(Produccion p) throws Exception;
+    boolean update(Produccion p) throws Exception;
+    boolean delete(int id) throws Exception;
+    Produccion findById(int id) throws Exception;
+    List<Produccion> findAll() throws Exception;
+    List<Produccion> findByCerveza(int cervezaId) throws Exception;
 }
