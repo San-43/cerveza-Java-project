@@ -11,6 +11,7 @@ module org.cerveza.cerveza {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.sql;
+    requires annotations;
 
     opens org.cerveza.cerveza to javafx.fxml;
     opens org.cerveza.cerveza.controller to javafx.fxml; // para fx:controller

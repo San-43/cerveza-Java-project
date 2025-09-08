@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="16" styleClass="card"
+      fx:controller="org.cerveza.cerveza.controller.VentaFormController">
+    <children>
+        <Label text="Ventas" styleClass="h1"/>
+        <GridPane hgap="10" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="70"/>
+            </columnConstraints>
 
-</AnchorPane>
+            <Label text="Expendio" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cboExpendio" promptText="Selecciona expendio" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Presentación" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cboPresentacion" promptText="Selecciona presentación" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Fecha" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpFecha" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Cantidad" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtCantidad" promptText="p. ej. 100" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Nuevo" onAction="#onNuevo" fx:id="btnNuevo"/>
+            <Button text="Guardar" onAction="#onGuardar" fx:id="btnGuardar"/>
+            <Button text="Eliminar" onAction="#onEliminar" fx:id="btnEliminar"/>
+        </HBox>
+
+        <TableView fx:id="tblVentas" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="colExpendio" text="Expendio (ID)" prefWidth="140"/>
+                <TableColumn fx:id="colPresentacion" text="Presentación (ID)" prefWidth="160"/>
+                <TableColumn fx:id="colFecha" text="Fecha" prefWidth="140"/>
+                <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </children>
+</VBox>
