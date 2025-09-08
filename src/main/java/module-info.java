@@ -12,7 +12,6 @@ module org.cerveza.cerveza {
     requires com.almasb.fxgl.all;
     requires java.sql;
     requires annotations;
-    requires org.cerveza.cerveza;
     requires javafx.base;
 
     opens org.cerveza.cerveza to javafx.fxml;
