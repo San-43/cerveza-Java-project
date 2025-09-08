@@ -1,100 +1,98 @@
-.root {
-    -fx-font-family: Inter, "Segoe UI", Roboto, Arial;
-    -fx-font-size: 14px;
-}
-
-/* Branding */
-.brand {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-opacity: 0.85;
-    -fx-text-fill: #9ca3af; /* gris suave */
-}
-
-.muted {
-    -fx-opacity: 0.7;
-    -fx-text-fill: #6b7280;
-}
-
-/* Tarjetas */
-.card {
-    -fx-padding: 20;
-    -fx-background-color: linear-gradient(to bottom, #ffffff, #f7f7f9);
-    -fx-background-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0.2, 0, 4);
-}
-
-/* Inputs */
-.text-field,
-.text-area {
-    -fx-background-radius: 10;
-}
-
-.button {
-    -fx-background-radius: 12;
-    -fx-padding: 8 16;
-}
-
-.table-view {
-    -fx-background-radius: 12;
-}
-
 /* MenuBar */
-.menu-bar {
-    -fx-background-color: linear-gradient(to right, #111827, #1f2937);
-    -fx-padding: 4 8;
+.app-menubar {
+    -fx-background-color: linear-gradient(to bottom, #2b2b2b, #1f1f1f);
+    -fx-padding: 4 8 4 8;
+    -fx-background-insets: 0, 1 0 0 0;
 }
 
+/* Texto de los menús en la barra */
 .menu-bar .label {
-    -fx-text-fill: #f9fafb; /* blanco casi puro */
+    -fx-text-fill: white;
     -fx-font-weight: 600;
 }
 
-/* Menús desplegables */
+/* Menú desplegable */
 .context-menu {
-    -fx-background-color: #1f2937;
+    -fx-background-color: #2b2b2b;
+    -fx-background-insets: 0;
     -fx-padding: 6 4;
-    -fx-background-radius: 6;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 10, 0.2, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0.2, 0, 3);
 }
 
+/* Items del desplegable */
 .menu-item > .label {
-    -fx-text-fill: #f3f4f6;
+    -fx-text-fill: white;
     -fx-font-size: 13px;
 }
 
-.menu-item:focused,
-.menu-item:hover {
-    -fx-background-color: #374151;
+/* Hover/focus en items */
+.menu-item:focused, .menu-item:hover {
+    -fx-background-color: #3a3a3a;
 }
 
-/* Toolbar */
-.tool-bar {
-    -fx-background-color: #111827;
-    -fx-padding: 6 10;
+/* Separadores del menú */
+.separator .line {
+    -fx-background-color: rgba(255,255,255,0.15);
+}
+
+/* ToolBar */
+.app-toolbar {
+    -fx-background-color: linear-gradient(to bottom, #f6f7f9, #e9ebef);
+    -fx-padding: 6 8;
     -fx-spacing: 6;
-    -fx-border-color: #1f2937;
+    -fx-background-insets: 0 0 0 0;
+    -fx-border-color: #d6d8de;
     -fx-border-width: 0 0 1 0;
 }
 
-.tool-bar .button {
-    -fx-background-color: #2563eb;
-    -fx-text-fill: white;
-    -fx-font-weight: 600;
-    -fx-background-radius: 8;
+/* Botones de la ToolBar */
+.app-toolbar .button {
+    -fx-background-radius: 10;
     -fx-padding: 6 12;
+    -fx-font-weight: 600;
 }
 
-.tool-bar .button:hover {
-    -fx-background-color: #1d4ed8;
+.app-toolbar .button:hover {
+    -fx-background-color: #e6e9f0;
 }
 
-.tool-bar .button:armed {
-    -fx-background-color: #1e40af;
+.app-toolbar .button:armed {
+    -fx-background-color: #d7dbe6;
 }
 
-/* Heading */
-.h1 {
-    -fx-font-size: 24px;
-    -fx-font-weight: 700;
+/* Espaciador flexible */
+.spacer {
+    -fx-min-width: 0.0;
+}
+
+/* Marca */
+.brand {
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: bold;
+    -fx-padding: 0 6 0 6;
+}
+
+/* Texto tenue para el centro */
+.muted {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+}
+
+/* Soporte básico para tema oscuro: añade 'dark' al root si lo usas */
+.dark .app-menubar {
+    -fx-background-color: linear-gradient(to bottom, #1e1e1e, #161616);
+}
+.dark .menu-bar .label,
+.dark .menu-item > .label {
+    -fx-text-fill: #f0f0f0;
+}
+.dark .context-menu {
+    -fx-background-color: #1f1f1f;
+}
+.dark .app-toolbar {
+    -fx-background-color: linear-gradient(to bottom, #222, #1a1a1a);
+    -fx-border-color: #2a2a2a;
+}
+.dark .brand, .dark .muted {
+    -fx-text-fill: #a0a0a0;
 }
