@@ -28,6 +28,14 @@
                 <Button onAction="#openEnvaseForm" text="Envases" />
                 <Button onAction="#openProduccionForm" text="Producción" />
                 <Button onAction="#openExpendioForm"   text="Expendio" />
+                <Button onAction="#openExistenciaForm"   text="Existencia" />
+                <Button onAction="#openFabricanteForm"   text="Fabricante" />
+                <Button onAction="#openIngredienteForm"   text="Ingrediente" />
+                <Button onAction="#openOrdenForm"   text="Orden" />
+                <Button onAction="#openPedidoForm"   text="Pedido" />
+                <Button onAction="#openPresentacionForm"   text="Presentacion" />
+                <Button onAction="#openRecetaForm"   text="Receta" />
+                <Button onAction="#openVentaForm"   text="Venta" />
                 <Separator />
                 <Label styleClass="brand" text="MyDB" />
             </ToolBar>

@@ -26,6 +26,14 @@ public class MainController {
     @FXML public void openEnvaseForm()  { setCenter("/fxml/envase-form.fxml"); }
     @FXML public void openProduccionForm()  { setCenter("/fxml/produccion-form.fxml"); }
     @FXML public void openExpendioForm()  { setCenter("/fxml/expendio-form.fxml"); }
+    @FXML public void openExistenciaForm()  { setCenter("/fxml/existencia-form.fxml"); }
+    @FXML public void openFabricanteForm()  { setCenter("/fxml/fabricante-form.fxml"); }
+    @FXML public void openIngredienteForm()  { setCenter("/fxml/ingrediente-form.fxml"); }
+    @FXML public void openOrdenForm()  { setCenter("/fxml/orden-form.fxml"); }
+    @FXML public void openPedidoForm()  { setCenter("/fxml/pedidos-form.fxml"); }
+    @FXML public void openPresentacionForm()  { setCenter("/fxml/presentacion-form.fxml"); }
+    @FXML public void openRecetaForm()  { setCenter("/fxml/receta-form.fxml"); }
+    @FXML public void openVentaForm()  { setCenter("/fxml/venta-form.fxml"); }
 
     private void setCenter(String absoluteFxmlPath) {
         try {
