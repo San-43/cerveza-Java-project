@@ -118,10 +118,10 @@ public class RecetaFormController {
     }
 
     // Item simple para combos
-    public static class ComboItem {
-        public final int id;
-        public final String nombre;
-        public ComboItem(int id, String nombre) { this.id = id; this.nombre = nombre; }
-        @Override public String toString() { return nombre + " (ID " + id + ")"; }
-    }
+        public record ComboItem(int id, String nombre) {
+        @Override
+        public String toString() {
+            return nombre + " (ID " + id + ")";
+        }
+        }
 }

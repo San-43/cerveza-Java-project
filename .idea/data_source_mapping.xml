@@ -11,5 +11,6 @@
     <file url="file://$PROJECT_DIR$/src/main/java/org/cerveza/cerveza/dao/impl/PresentacionDaoImpl.java" value="0859ea87-6cf3-49e2-8e51-ae8a25c931a5" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/cerveza/cerveza/dao/impl/ProduccionDaoImpl.java" value="0859ea87-6cf3-49e2-8e51-ae8a25c931a5" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/cerveza/cerveza/dao/impl/RecetaDaoImpl.java" value="0859ea87-6cf3-49e2-8e51-ae8a25c931a5" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/cerveza/cerveza/dao/impl/VentaDaoImpl.java" value="0859ea87-6cf3-49e2-8e51-ae8a25c931a5" />
   </component>
 </project>
