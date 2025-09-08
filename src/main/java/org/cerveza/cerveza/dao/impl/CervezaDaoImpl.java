@@ -50,14 +50,14 @@ public class CervezaDaoImpl implements CervezaDao {
 
     @Override
     public Optional<Cerveza> findById(int id) {
-        String sql = "SELECT idcerveza, idmarca, nombre, aspecto, procedimientos, graduacion FROM cerveza WHERE idcerveza=?";
+        String sql = "SELECT idcerveza, idmarca, nombre, aspecto, procedimientos, graduacion, existencia_total FROM cerveza WHERE idcerveza=?";
         try (Connection cn = Database.getConnection(); PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 Cerveza c = new Cerveza(
                         rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getObject(6) == null ? null : rs.getDouble(6)
+                        rs.getObject(6) == null ? null : rs.getDouble(6), rs.getInt(7)
                 );
                 return Optional.of(c);
             }
@@ -68,14 +68,14 @@ public class CervezaDaoImpl implements CervezaDao {
 
     @Override
     public List<Cerveza> findAll() {
-        String sql = "SELECT idcerveza, idmarca, nombre, aspecto, procedimientos, graduacion FROM cerveza ORDER BY idcerveza DESC";
+        String sql = "SELECT idcerveza, idmarca, nombre, aspecto, procedimientos, graduacion, existencia_total FROM cerveza ORDER BY idcerveza DESC";
         List<Cerveza> list = new ArrayList<>();
         try (Connection cn = Database.getConnection(); Statement st = cn.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 list.add(new Cerveza(
                         rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getObject(6) == null ? null : rs.getDouble(6)
+                        rs.getObject(6) == null ? null : rs.getDouble(6), rs.getInt(7)
                 ));
             }
         } catch (SQLException e) { throw new RuntimeException(e); }

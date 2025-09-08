@@ -53,6 +53,7 @@
                     <TableColumn text="Nombre" fx:id="colNombre" prefWidth="200"/>
                     <TableColumn text="Aspecto" fx:id="colAspecto" prefWidth="120"/>
                     <TableColumn text="Graduación" fx:id="colGraduacion" prefWidth="100"/>
+                    <TableColumn text="Existencia Total" fx:id="colExistenciaTotal" prefWidth="80" />
                 </columns>
             </TableView>
         </VBox>

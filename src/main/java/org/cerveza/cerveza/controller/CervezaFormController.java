@@ -14,6 +14,7 @@ import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 
 public class CervezaFormController {
+
     @FXML
     private TextField txtIdMarca, txtNombre, txtAspecto, txtGraduacion;
     @FXML private TextArea txtProcedimientos;
@@ -22,6 +23,7 @@ public class CervezaFormController {
     @FXML private TableColumn<Cerveza, Integer> colId, colIdMarca;
     @FXML private TableColumn<Cerveza, String> colNombre, colAspecto;
     @FXML private TableColumn<Cerveza, Double> colGraduacion;
+    @FXML private TableColumn<Cerveza, Integer> colExistenciaTotal;
 
     private final CervezaDao dao = new CervezaDaoImpl();
     private final ValidationSupport vs = new ValidationSupport();
@@ -34,6 +36,7 @@ public class CervezaFormController {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colAspecto.setCellValueFactory(new PropertyValueFactory<>("aspecto"));
         colGraduacion.setCellValueFactory(new PropertyValueFactory<>("graduacion"));
+        colExistenciaTotal.setCellValueFactory(new PropertyValueFactory<>("existenciaTotal"));
         refreshTable();
 
 
@@ -77,7 +80,7 @@ public class CervezaFormController {
             }
 
 
-            Cerveza c = new Cerveza(null, idMarca, nombre, aspecto, proc, grad);
+            Cerveza c = new Cerveza(null, idMarca, nombre, aspecto, proc, grad, null);
             dao.insert(c);
             showInfo("Guardado", "Cerveza registrada correctamente.");
             refreshTable();

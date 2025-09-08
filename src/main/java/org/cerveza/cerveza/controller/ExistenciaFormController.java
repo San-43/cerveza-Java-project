@@ -135,10 +135,17 @@ public class ExistenciaFormController {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION,
                 "¿Eliminar la existencia #" + row.getIdExistencia() + "?", ButtonType.OK, ButtonType.CANCEL);
         if (a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            if (dao.delete(row.getIdExistencia())) refrescarTabla();
+            try {
+                dao.delete(row.getIdExistencia());
+                refrescarTabla();
+                limpiar();
+                info("Eliminado", "Envase eliminado correctamente");
+            } catch (Exception e) { error("No se pudo eliminar: " + e.getMessage()); }
         }
     }
 
+    private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
+    private void error(String m) { Alert a = new Alert(Alert.AlertType.ERROR); a.setHeaderText("Validación"); a.setContentText(m); a.showAndWait(); }
     // record simple para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
 }

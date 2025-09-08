@@ -7,8 +7,13 @@ public class Cerveza {
     private String aspecto;
     private String procedimientos;
     private Double graduacion; // decimal(4,2)
+    private Integer existenciaTotal;
 
 
+    public Cerveza(Integer id, Integer idMarca, String nombre, String aspecto, String procedimientos, Double graduacion, Integer existenciaTotal) {
+        this.id = id; this.idMarca = idMarca; this.nombre = nombre; this.aspecto = aspecto; this.procedimientos = procedimientos; this.graduacion = graduacion;
+        this.existenciaTotal = existenciaTotal;
+    }
     public Cerveza(Integer id, Integer idMarca, String nombre, String aspecto, String procedimientos, Double graduacion) {
         this.id = id; this.idMarca = idMarca; this.nombre = nombre; this.aspecto = aspecto; this.procedimientos = procedimientos; this.graduacion = graduacion;
     }
@@ -28,4 +33,6 @@ public class Cerveza {
     public void setProcedimientos(String procedimientos) { this.procedimientos = procedimientos; }
     public Double getGraduacion() { return graduacion; }
     public void setGraduacion(Double graduacion) { this.graduacion = graduacion; }
+    public Integer getExistenciaTotal() { return existenciaTotal; }
+    public void setExistenciaTotal(Integer existenciaTotal) { this.existenciaTotal = existenciaTotal; }
 }
