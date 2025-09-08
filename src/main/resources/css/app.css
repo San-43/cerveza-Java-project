@@ -1,19 +1,100 @@
-.root { -fx-font-family: Inter, "Segoe UI", Roboto, Arial; -fx-font-size: 14px; }
-.brand { -fx-font-size: 16px; -fx-font-weight: bold; -fx-opacity: 0.8; }
-.muted { -fx-opacity: 0.7; }
+.root {
+    -fx-font-family: Inter, "Segoe UI", Roboto, Arial;
+    -fx-font-size: 14px;
+}
 
+/* Branding */
+.brand {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.85;
+    -fx-text-fill: #9ca3af; /* gris suave */
+}
 
-.card { -fx-padding: 20; -fx-background-color: linear-gradient(to bottom, #ffffff, #f7f7f9); -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0.2, 0, 4); }
+.muted {
+    -fx-opacity: 0.7;
+    -fx-text-fill: #6b7280;
+}
 
+/* Tarjetas */
+.card {
+    -fx-padding: 20;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f7f7f9);
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0.2, 0, 4);
+}
 
-.text-field, .text-area { -fx-background-radius: 10; }
-.button { -fx-background-radius: 12; -fx-padding: 8 16; }
-.table-view { -fx-background-radius: 12; }
+/* Inputs */
+.text-field,
+.text-area {
+    -fx-background-radius: 10;
+}
 
+.button {
+    -fx-background-radius: 12;
+    -fx-padding: 8 16;
+}
 
-.menu-bar { -fx-background-color: linear-gradient(to right, #111827, #1f2937); }
-.menu-bar .label { -fx-text-fill: white; }
-.tool-bar { -fx-background-color: #111827; }
-.tool-bar .button { -fx-background-color: #2563eb; -fx-text-fill: white; }
-.tool-bar .button:hover { -fx-background-color: #1d4ed8; }
-.h1 { -fx-font-size: 24px; -fx-font-weight: 700; }
+.table-view {
+    -fx-background-radius: 12;
+}
+
+/* MenuBar */
+.menu-bar {
+    -fx-background-color: linear-gradient(to right, #111827, #1f2937);
+    -fx-padding: 4 8;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #f9fafb; /* blanco casi puro */
+    -fx-font-weight: 600;
+}
+
+/* Menús desplegables */
+.context-menu {
+    -fx-background-color: #1f2937;
+    -fx-padding: 6 4;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 10, 0.2, 0, 3);
+}
+
+.menu-item > .label {
+    -fx-text-fill: #f3f4f6;
+    -fx-font-size: 13px;
+}
+
+.menu-item:focused,
+.menu-item:hover {
+    -fx-background-color: #374151;
+}
+
+/* Toolbar */
+.tool-bar {
+    -fx-background-color: #111827;
+    -fx-padding: 6 10;
+    -fx-spacing: 6;
+    -fx-border-color: #1f2937;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tool-bar .button {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.tool-bar .button:armed {
+    -fx-background-color: #1e40af;
+}
+
+/* Heading */
+.h1 {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+}
