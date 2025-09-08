@@ -65,8 +65,11 @@ public class ExpendioFormController {
             String nombre = safe(txtNombre.getText());
             if (nombre.isEmpty()) throw new IllegalArgumentException("El nombre es obligatorio.");
             String ubicacion = safe(txtUbicacion.getText());
+            if (ubicacion.isEmpty()) throw new IllegalArgumentException("La ubicación es obligatoria.");
             String rfc = safe(txtRFC.getText()).toUpperCase();
+            if (rfc.isEmpty()) throw new IllegalArgumentException("El rfc es obligatorio.");
             String responsable = safe(txtResponsable.getText());
+            if (responsable.isEmpty()) throw new IllegalArgumentException("El responsable es obligatorio.");
 
             Expendio sel = tblExpendios.getSelectionModel().getSelectedItem();
             if (sel == null) {

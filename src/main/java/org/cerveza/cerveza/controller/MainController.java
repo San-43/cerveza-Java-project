@@ -8,7 +8,6 @@ import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.Objects;
-import java.util.Queue;
 
 public class MainController {
     @FXML private StackPane contentPane; // en main.fxml debe existir fx:id="contentPane"
