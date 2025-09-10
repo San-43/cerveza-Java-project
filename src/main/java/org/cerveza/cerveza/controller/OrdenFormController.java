@@ -11,15 +11,18 @@ import org.cerveza.cerveza.model.Orden;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
+import org.controlsfx.validation.ValidationResult;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 public class OrdenFormController {
-    @FXML private TextField txtIdOrden, txtIdPresentacion, txtCantidad, txtFechaOrden, txtFechaDespacho;
+    @FXML private TextField txtIdOrden, txtIdPresentacion, txtCantidad;
     @FXML private Button btnGuardar, btnEliminar;
     @FXML private TableView<Orden> tblOrdenes;
     @FXML private TableColumn<Orden, Integer> colIdOrden, colIdPresentacion, colCantidad;
     @FXML private TableColumn<Orden, Date> colFechaOrden, colFechaDespacho;
+    @FXML private DatePicker dpFechaOrden, dpFechaDespacho;
 
     private final OrdenDao dao = new OrdenDaoImpl();
     private final ValidationSupport vs = new ValidationSupport();
@@ -42,9 +45,8 @@ public class OrdenFormController {
         // Validations
         vs.registerValidator(txtIdPresentacion, true, Validator.createRegexValidator("ID Presentación numérico", "^\\d+$", Severity.ERROR));
         vs.registerValidator(txtCantidad, true, Validator.createRegexValidator("Cantidad numérica", "^\\d+$", Severity.ERROR));
-        vs.registerValidator(txtFechaOrden, true, Validator.createRegexValidator("Fecha orden formato YYYY-MM-DD", "^\\d{4}-\\d{2}-\\d{2}$", Severity.ERROR));
-        vs.registerValidator(txtFechaDespacho, false, Validator.createRegexValidator("Fecha despacho formato YYYY-MM-DD", "^\\d{4}-\\d{2}-\\d{2}$", Severity.ERROR));
-
+        vs.registerValidator(dpFechaOrden, true, (c, value) -> ValidationResult.fromErrorIf(dpFechaOrden, "Fecha orden requerida", dpFechaOrden.getValue() == null));
+        // Fecha despacho opcional, no requiere validación estricta
         btnGuardar.disableProperty().bind(Bindings.createBooleanBinding(() -> vs.isInvalid(), vs.invalidProperty()));
     }
 
@@ -52,8 +54,8 @@ public class OrdenFormController {
         txtIdOrden.setText(orden.getIdOrden() != null ? orden.getIdOrden().toString() : "");
         txtIdPresentacion.setText(orden.getIdPresentacion() != null ? orden.getIdPresentacion().toString() : "");
         txtCantidad.setText(orden.getCantidad() != null ? orden.getCantidad().toString() : "");
-        txtFechaOrden.setText(orden.getFecha_orden() != null ? orden.getFecha_orden().toString() : "");
-        txtFechaDespacho.setText(orden.getFecha_despacho() != null ? orden.getFecha_despacho().toString() : "");
+        dpFechaOrden.setValue(orden.getFecha_orden() != null ? orden.getFecha_orden().toLocalDate() : null);
+        dpFechaDespacho.setValue(orden.getFecha_despacho() != null ? orden.getFecha_despacho().toLocalDate() : null);
     }
 
     @FXML
@@ -64,18 +66,30 @@ public class OrdenFormController {
         try {
             Integer idPresentacion = Integer.parseInt(txtIdPresentacion.getText().trim());
             Integer cantidad = Integer.parseInt(txtCantidad.getText().trim());
-            Date fechaOrden = Date.valueOf(txtFechaOrden.getText().trim());
-            Date fechaDespacho = txtFechaDespacho.getText().isBlank() ? null : Date.valueOf(txtFechaDespacho.getText().trim());
+            LocalDate fechaOrdenLocal = dpFechaOrden.getValue();
+            LocalDate fechaDespachoLocal = dpFechaDespacho.getValue();
+            Date fechaOrden = fechaOrdenLocal != null ? Date.valueOf(fechaOrdenLocal) : null;
+            Date fechaDespacho = fechaDespachoLocal != null ? Date.valueOf(fechaDespachoLocal) : null;
 
-            Orden orden = new Orden(idPresentacion, cantidad, fechaOrden, fechaDespacho);
-            dao.insert(orden);
-            showInfo("Guardado", "Orden registrada correctamente.");
+            Orden orden;
+            if (!txtIdOrden.getText().isBlank()) {
+                // Actualizar existente
+                Integer idOrden = Integer.parseInt(txtIdOrden.getText().trim());
+                orden = new Orden(idOrden, idPresentacion, cantidad, fechaOrden, fechaDespacho);
+                dao.update(orden);
+                showInfo("Actualizado", "Orden actualizada correctamente.");
+            } else {
+                // Insertar nuevo
+                orden = new Orden(idPresentacion, cantidad, fechaOrden, fechaDespacho);
+                dao.insert(orden);
+                showInfo("Guardado", "Orden registrada correctamente.");
+            }
             refreshTable();
             onLimpiar();
         } catch (NumberFormatException ex) {
             showError("Revisa los campos numéricos.");
         } catch (IllegalArgumentException ex) {
-            showError("Revisa los campos de fecha (YYYY-MM-DD).");
+            showError("Revisa los campos de fecha.");
         } catch (Exception ex) {
             showError("Error al guardar: " + ex.getMessage());
         }
@@ -103,8 +117,8 @@ public class OrdenFormController {
         txtIdOrden.clear();
         txtIdPresentacion.clear();
         txtCantidad.clear();
-        txtFechaOrden.clear();
-        txtFechaDespacho.clear();
+        dpFechaOrden.setValue(null);
+        dpFechaDespacho.setValue(null);
     }
 
     private void refreshTable() {

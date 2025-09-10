@@ -31,10 +31,10 @@
                 <TextField fx:id="txtCantidad" promptText="ej. 100" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                 <Label text="Fecha Orden" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <TextField fx:id="txtFechaOrden" promptText="YYYY-MM-DD" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <DatePicker fx:id="dpFechaOrden" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <Label text="Fecha Despacho" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <TextField fx:id="txtFechaDespacho" promptText="YYYY-MM-DD" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <DatePicker fx:id="dpFechaDespacho" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </GridPane>
 
             <HBox alignment="CENTER_RIGHT" spacing="10">
