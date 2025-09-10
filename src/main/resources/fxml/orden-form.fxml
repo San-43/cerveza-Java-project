@@ -21,8 +21,8 @@
                <RowConstraints />
                 </rowConstraints>
 
-                <Label text="Ingrediente (ID)" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="txtIdIngrediente" editable="false" promptText="ej. 1" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="ID Orden" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="txtIdOrden" editable="false" promptText="ej. 1" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                 <Label text="Presentación (ID)" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <TextField fx:id="txtIdPresentacion" promptText="ej. 2" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -41,11 +41,12 @@
                 <Button onAction="#onNuevo" text="Nuevo" />
                 <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
                 <Button onAction="#onLimpiar" text="Limpiar" />
+                <Button fx:id="btnEliminar" onAction="#onEliminar" text="Eliminar" />
             </HBox>
 
             <TableView fx:id="tblOrdenes" prefHeight="300">
                 <columns>
-                    <TableColumn fx:id="colIdIngrediente" prefWidth="80" text="Ingrediente" />
+                    <TableColumn fx:id="colIdOrden" prefWidth="80" text="ID Orden" />
                     <TableColumn fx:id="colIdPresentacion" prefWidth="80" text="Presentación" />
                     <TableColumn fx:id="colCantidad" prefWidth="100" text="Cantidad" />
                     <TableColumn fx:id="colFechaOrden" prefWidth="120" text="Fecha Orden" />

@@ -15,10 +15,10 @@ import org.controlsfx.validation.Validator;
 import java.sql.Date;
 
 public class OrdenFormController {
-    @FXML private TextField txtIdIngrediente, txtIdPresentacion, txtCantidad, txtFechaOrden, txtFechaDespacho;
-    @FXML private Button btnGuardar;
+    @FXML private TextField txtIdOrden, txtIdPresentacion, txtCantidad, txtFechaOrden, txtFechaDespacho;
+    @FXML private Button btnGuardar, btnEliminar;
     @FXML private TableView<Orden> tblOrdenes;
-    @FXML private TableColumn<Orden, Integer> colIdIngrediente, colIdPresentacion, colCantidad;
+    @FXML private TableColumn<Orden, Integer> colIdOrden, colIdPresentacion, colCantidad;
     @FXML private TableColumn<Orden, Date> colFechaOrden, colFechaDespacho;
 
     private final OrdenDao dao = new OrdenDaoImpl();
@@ -27,12 +27,17 @@ public class OrdenFormController {
     @FXML
     public void initialize() {
         // Table setup
-        colIdIngrediente.setCellValueFactory(new PropertyValueFactory<>("idOrden"));
+        colIdOrden.setCellValueFactory(new PropertyValueFactory<>("idOrden"));
         colIdPresentacion.setCellValueFactory(new PropertyValueFactory<>("idPresentacion"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colFechaOrden.setCellValueFactory(new PropertyValueFactory<>("fecha_orden"));
         colFechaDespacho.setCellValueFactory(new PropertyValueFactory<>("fecha_despacho"));
         refreshTable();
+
+        // Table selection listener to fill form
+        tblOrdenes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) fillForm(newSel);
+        });
 
         // Validations
         vs.registerValidator(txtIdPresentacion, true, Validator.createRegexValidator("ID Presentación numérico", "^\\d+$", Severity.ERROR));
@@ -41,6 +46,14 @@ public class OrdenFormController {
         vs.registerValidator(txtFechaDespacho, false, Validator.createRegexValidator("Fecha despacho formato YYYY-MM-DD", "^\\d{4}-\\d{2}-\\d{2}$", Severity.ERROR));
 
         btnGuardar.disableProperty().bind(Bindings.createBooleanBinding(() -> vs.isInvalid(), vs.invalidProperty()));
+    }
+
+    private void fillForm(Orden orden) {
+        txtIdOrden.setText(orden.getIdOrden() != null ? orden.getIdOrden().toString() : "");
+        txtIdPresentacion.setText(orden.getIdPresentacion() != null ? orden.getIdPresentacion().toString() : "");
+        txtCantidad.setText(orden.getCantidad() != null ? orden.getCantidad().toString() : "");
+        txtFechaOrden.setText(orden.getFecha_orden() != null ? orden.getFecha_orden().toString() : "");
+        txtFechaDespacho.setText(orden.getFecha_despacho() != null ? orden.getFecha_despacho().toString() : "");
     }
 
     @FXML
@@ -69,8 +82,25 @@ public class OrdenFormController {
     }
 
     @FXML
+    public void onEliminar() {
+        Orden selected = tblOrdenes.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Selecciona una orden para eliminar.");
+            return;
+        }
+        try {
+            dao.delete(selected.getIdOrden());
+            showInfo("Eliminado", "Orden eliminada correctamente.");
+            refreshTable();
+            onLimpiar();
+        } catch (Exception ex) {
+            showError("Error al eliminar: " + ex.getMessage());
+        }
+    }
+
+    @FXML
     public void onLimpiar() {
-        txtIdIngrediente.clear();
+        txtIdOrden.clear();
         txtIdPresentacion.clear();
         txtCantidad.clear();
         txtFechaOrden.clear();
