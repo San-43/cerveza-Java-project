@@ -107,14 +107,17 @@ public class ExistenciaDaoImpl implements ExistenciaDao {
 
     @Override
     public boolean delete(int id) {
-        String sql = "DELETE FROM existencia WHERE idexistencia=?";
+        String sql = "DELETE FROM existencia WHERE idexistencia=?";   // ✅
         try (Connection cn = getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException ex) { ex.printStackTrace(); }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
         return false;
     }
+
 
     private Existencia map(ResultSet rs) throws SQLException {
         int id = rs.getInt("idexistencia");
@@ -122,8 +125,18 @@ public class ExistenciaDaoImpl implements ExistenciaDao {
         int idPresentacion = rs.getInt("idpresentacion");
         int cantidad = rs.getInt("cantidad");
         LocalDate fecha = rs.getDate("fecha").toLocalDate();
-        String expendio = false ? rs.getString("expendio_nombre") : null;
-        String presentacion = false ? rs.getString("presentacion_nombre") : null;
+        String expendio = getIfPresent(rs, "expendio_nombre");
+        String presentacion = getIfPresent(rs, "presentacion_nombre");
         return new Existencia(id, idExpendio, idPresentacion, cantidad, fecha, expendio, presentacion);
     }
+
+    private static String getIfPresent(ResultSet rs, String col) {
+        try {
+            rs.findColumn(col);      // lanza excepción si no existe
+            return rs.getString(col);
+        } catch (SQLException ignore) {
+            return null;
+        }
+    }
+
 }
