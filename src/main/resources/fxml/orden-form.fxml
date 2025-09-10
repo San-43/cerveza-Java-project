@@ -1,14 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.cerveza.cerveza.controller.OrdenFormController">
 
+    <children>
+        <VBox spacing="16.0" styleClass="card" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <Label styleClass="h1" text="Órdenes" />
+            <GridPane hgap="10" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="30" />
+                    <ColumnConstraints percentWidth="70" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+                </rowConstraints>
+
+                <Label text="ID Orden" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="txtIdOrden" editable="false" promptText="ej. 1" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Presentación" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <ComboBox fx:id="cmbPresentacion" promptText="Seleccione una presentación" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="Cantidad" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtCantidad" promptText="ej. 100" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label text="Fecha Orden" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <DatePicker fx:id="dpFechaOrden" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                <Label text="Fecha Despacho" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <DatePicker fx:id="dpFechaDespacho" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            </GridPane>
+
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button onAction="#onNuevo" text="Nuevo" />
+                <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
+                <Button onAction="#onLimpiar" text="Limpiar" />
+                <Button fx:id="btnEliminar" onAction="#onEliminar" text="Eliminar" />
+            </HBox>
+
+            <TableView fx:id="tblOrdenes" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colIdOrden" prefWidth="80" text="ID Orden" />
+                    <TableColumn fx:id="colIdPresentacion" prefWidth="80" text="Presentación" />
+                    <TableColumn fx:id="colCantidad" prefWidth="100" text="Cantidad" />
+                    <TableColumn fx:id="colFechaOrden" prefWidth="120" text="Fecha Orden" />
+                    <TableColumn fx:id="colFechaDespacho" prefWidth="120" text="Fecha Despacho" />
+                </columns>
+            </TableView>
+        </VBox>
+    </children>
 </AnchorPane>
