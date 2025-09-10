@@ -30,7 +30,7 @@ public class IngredienteDaoImpl implements IngredienteDao {
 
     @Override
     public boolean update(Ingrediente ingrediente) throws Exception {
-        String sql = "UPDATE ingrediente SET nombre=?, ubicacion=descripcion WHERE idingrediente=?";
+        String sql = "UPDATE ingrediente SET nombre = ?, descripcion = ? WHERE idingrediente = ?";
         try (Connection cn = getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setString(1, ingrediente.getNombre());
