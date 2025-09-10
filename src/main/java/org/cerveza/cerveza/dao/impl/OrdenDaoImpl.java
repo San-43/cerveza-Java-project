@@ -60,4 +60,33 @@ public class OrdenDaoImpl implements OrdenDao {
         } catch (SQLException e) { throw new RuntimeException(e); }
         return list;
     }
+
+    @Override
+    public List<IdName> findPresentacionesWithFullName() throws Exception {
+        String sql = """
+            SELECT p.idpresentacion,
+                   m.nombre AS marca_nombre,
+                   c.nombre AS cerveza_nombre,
+                   e.nombre AS envase_nombre
+            FROM presentacion p
+            JOIN cerveza c ON c.idcerveza = p.idcerveza
+            JOIN marca m ON m.idmarca = c.idmarca
+            JOIN envase e ON e.idenvase = p.idenvase
+            ORDER BY m.nombre, c.nombre, e.nombre
+        """;
+        List<IdName> list = new ArrayList<>();
+        try (Connection cn = Database.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int idPresentacion = rs.getInt("idpresentacion");
+                String marca = rs.getString("marca_nombre");
+                String cerveza = rs.getString("cerveza_nombre");
+                String envase = rs.getString("envase_nombre");
+                String displayName = String.format("%s %s %s", marca, cerveza, envase);
+                list.add(new IdName(idPresentacion, displayName));
+            }
+        }
+        return list;
+    }
 }

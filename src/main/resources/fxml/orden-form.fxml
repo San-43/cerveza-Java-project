@@ -24,8 +24,8 @@
                 <Label text="ID Orden" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <TextField fx:id="txtIdOrden" editable="false" promptText="ej. 1" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Presentación (ID)" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="txtIdPresentacion" promptText="ej. 2" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Presentación" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <ComboBox fx:id="cmbPresentacion" promptText="Seleccione una presentación" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                 <Label text="Cantidad" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <TextField fx:id="txtCantidad" promptText="ej. 100" GridPane.columnIndex="1" GridPane.rowIndex="2" />

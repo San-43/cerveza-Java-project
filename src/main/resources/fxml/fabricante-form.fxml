@@ -8,7 +8,25 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
+            fx:controller="org.cerveza.cerveza.controller.FabricanteFormController"
             prefHeight="400.0" prefWidth="600.0">
-
+    <TableView fx:id="fabricanteTable" layoutX="20" layoutY="20" prefWidth="560" prefHeight="180" onMouseClicked="#onTableClicked">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="60" />
+            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="140" />
+            <TableColumn fx:id="colPais" text="País" prefWidth="140" />
+            <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="220" />
+        </columns>
+    </TableView>
+    <Label layoutX="20" layoutY="220" text="Nombre:" />
+    <TextField fx:id="txtNombre" layoutX="80" layoutY="215" prefWidth="180" />
+    <Label layoutX="280" layoutY="220" text="País:" />
+    <TextField fx:id="txtPais" layoutX="330" layoutY="215" prefWidth="120" />
+    <Label layoutX="20" layoutY="260" text="Descripción:" />
+    <TextField fx:id="txtDescripcion" layoutX="100" layoutY="255" prefWidth="350" onKeyPressed="#onDescripcionKeyPressed" />
+    <Button fx:id="btnGuardar" layoutX="470" layoutY="215" text="Guardar" onAction="#guardarFabricante" />
+    <Button fx:id="btnActualizar" layoutX="470" layoutY="255" text="Actualizar" onAction="#actualizarFabricante" />
+    <Button fx:id="btnEliminar" layoutX="470" layoutY="295" text="Eliminar" onAction="#eliminarFabricante" />
+    <Label fx:id="lblError" layoutX="20" layoutY="375" textFill="red" />
+    <Button fx:id="btnLimpiar" layoutX="470" layoutY="335" text="Limpiar" onAction="#limpiarCampos" />
 </AnchorPane>
