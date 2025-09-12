@@ -81,7 +81,6 @@ public class IngredienteFormController {
     }
 
     private void clearForm() {
-        editingId = null;
         txtIdIngrediente.clear(); txtNombre.clear(); txtDescripcion.clear();
         tblIngredientes.getSelectionModel().clearSelection();
     }
@@ -95,6 +94,7 @@ public class IngredienteFormController {
             if (dao.delete(sel.getIdIngrediente())) {
                 data.remove(sel);
                 clearForm();
+                refrescarTabla();
             }
         } catch (Exception ex) {
             error("No se pudo eliminar", ex.getMessage());
@@ -125,6 +125,7 @@ public class IngredienteFormController {
                 tblIngredientes.refresh();
             }
             clearForm();
+            refrescarTabla();
         } catch (Exception ex) {
             error("No se pudo guardar", ex.getMessage());
         }

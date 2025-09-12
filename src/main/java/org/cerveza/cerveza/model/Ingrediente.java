@@ -12,7 +12,7 @@ public class Ingrediente {
     }
 
     public Ingrediente() {
-        this.idIngrediente = -1;
+        this.idIngrediente = null;
         this.nombre = "";
         this.descripcion = "";
     }

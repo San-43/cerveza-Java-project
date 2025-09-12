@@ -30,7 +30,7 @@ public class MainController {
     @FXML public void openFabricanteForm()  { setCenter("/fxml/fabricante-form.fxml"); }
     @FXML public void openIngredienteForm()  { setCenter("/fxml/ingrediente-form.fxml"); }
     @FXML public void openOrdenForm()  { setCenter("/fxml/orden-form.fxml"); }
-    @FXML public void openPedidoForm()  { setCenter("/fxml/pedidos-form.fxml"); }
+    @FXML public void openPedidoForm()  { setCenter("/fxml/pedido-form.fxml"); }
     @FXML public void openPresentacionForm()  { setCenter("/fxml/presentacion-form.fxml"); }
     @FXML public void openRecetaForm()  { setCenter("/fxml/receta-form.fxml"); }
     @FXML public void openVentaForm()  { setCenter("/fxml/venta-form.fxml"); }
