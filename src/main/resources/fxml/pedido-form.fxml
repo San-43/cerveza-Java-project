@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
-
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.cerveza.cerveza.controller.PedidoFormController">
+    <children>
+        <VBox spacing="16.0" styleClass="card" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <Label styleClass="h1" text="Pedidos" />
+            <GridPane hgap="10" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="30" />
+                    <ColumnConstraints percentWidth="70" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints />
+                </rowConstraints>
+                <Label text="ID Pedido" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="txtIdPedido" editable="false" promptText="ej. 1" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="ID Expendio" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="txtIdExpendio" promptText="ej. 10" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </GridPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
+                <Button fx:id="btnActualizar" onAction="#onActualizar" text="Actualizar" disable="true" />
+                <Button onAction="#onLimpiar" text="Limpiar" />
+                <Button fx:id="btnEliminar" onAction="#onEliminar" text="Eliminar" />
+            </HBox>
+            <TableView fx:id="tblPedidos" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colIdPedido" prefWidth="80" text="ID Pedido" />
+                    <TableColumn fx:id="colIdExpendio" prefWidth="120" text="ID Expendio" />
+                </columns>
+            </TableView>
+        </VBox>
+    </children>
 </AnchorPane>
