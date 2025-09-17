@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.transformation.FilteredList;
 import org.cerveza.cerveza.dao.impl.IngredienteDaoImpl;
 import org.cerveza.cerveza.model.Ingrediente;
 import org.controlsfx.validation.ValidationSupport;
@@ -46,19 +47,37 @@ public class IngredienteFormController {
     @FXML
     private Button btnEliminar;
 
-    // Método vinculado al onAction del botón Eliminar
+    @FXML
+    private TextField txtBuscar;
+
+    private FilteredList<Ingrediente> filteredData;
 
     @FXML
-    private void initialize() {
+    public void initialize() {
         System.out.println("Controlador cargado correctamente");
-
         // Configurar columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("idIngrediente"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
 
-        // Enlazar la lista de datos con la tabla
-        tblIngredientes.setItems(data);
+        // Enlazar la lista de datos con la tabla usando FilteredList
+        filteredData = new FilteredList<>(data, p -> true);
+        tblIngredientes.setItems(filteredData);
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> {
+                filteredData.setPredicate(ingrediente -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    String lowerCaseFilter = newValue.toLowerCase();
+                    // Buscar por id, nombre o descripción
+                    boolean matchesId = String.valueOf(ingrediente.getIdIngrediente()).contains(lowerCaseFilter);
+                    boolean matchesNombre = ingrediente.getNombre().toLowerCase().contains(lowerCaseFilter);
+                    boolean matchesDescripcion = ingrediente.getDescripcion() != null && ingrediente.getDescripcion().toLowerCase().contains(lowerCaseFilter);
+                    return matchesId || matchesNombre || matchesDescripcion;
+                });
+            });
+        }
 
         // Cargar los datos desde la base
         refrescarTabla();
