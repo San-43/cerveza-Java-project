@@ -34,6 +34,7 @@ public class MainController {
     @FXML public void openPresentacionForm()  { setCenter("/fxml/presentacion-form.fxml"); }
     @FXML public void openRecetaForm()  { setCenter("/fxml/receta-form.fxml"); }
     @FXML public void openVentaForm()  { setCenter("/fxml/venta-form.fxml"); }
+    @FXML public void openSearchView() { setCenter("/fxml/search-view.fxml"); }
 
     private void setCenter(String absoluteFxmlPath) {
         try {

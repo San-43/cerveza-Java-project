@@ -32,6 +32,12 @@
                         </items>
                     </Menu>
 
+                    <Menu text="_Consultas" mnemonicParsing="true">
+                        <items>
+                            <MenuItem text="Buscador" onAction="#openSearchView" accelerator="Ctrl+F"/>
+                        </items>
+                    </Menu>
+
                     <Menu text="_Ayuda" mnemonicParsing="true">
                         <items>
                             <MenuItem text="Acerca de" onAction="#onAcercaDe" accelerator="F1"/>
@@ -55,6 +61,7 @@
                 <Button onAction="#openPresentacionForm" text="Presentación"/>
                 <Button onAction="#openRecetaForm"       text="Receta"/>
                 <Button onAction="#openVentaForm"        text="Venta"/>
+                <Button onAction="#openSearchView"      text="Buscador"/>
 
                 <Separator/>
 
