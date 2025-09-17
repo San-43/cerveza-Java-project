@@ -16,7 +16,8 @@ import org.controlsfx.validation.Validator;
 public class CervezaFormController {
 
     @FXML
-    private TextField txtIdMarca, txtNombre, txtAspecto, txtGraduacion;
+    private ComboBox<Integer> cmbIdMarca;
+    @FXML private TextField txtNombre, txtAspecto, txtGraduacion;
     @FXML private TextArea txtProcedimientos;
     @FXML private Button btnGuardar;
     @FXML private TableView<Cerveza> tblCervezas;
@@ -26,6 +27,7 @@ public class CervezaFormController {
     @FXML private TableColumn<Cerveza, Integer> colExistenciaTotal;
 
     private final CervezaDao dao = new CervezaDaoImpl();
+    private final org.cerveza.cerveza.dao.MarcaDao marcaDao = new org.cerveza.cerveza.dao.impl.MarcaDaoImpl();
     private final ValidationSupport vs = new ValidationSupport();
 
     @FXML
@@ -39,9 +41,14 @@ public class CervezaFormController {
         colExistenciaTotal.setCellValueFactory(new PropertyValueFactory<>("existenciaTotal"));
         refreshTable();
 
+// Poblar ComboBox de marcas
+        cmbIdMarca.setItems(FXCollections.observableArrayList(
+            marcaDao.findAll().stream().map(m -> m.getId()).toList()
+        ));
+        cmbIdMarca.setPromptText("Selecciona una marca");
 
 // Validaciones (obligatorios + formatos)
-        vs.registerValidator(txtIdMarca, true, Validator.createRegexValidator("ID marca numérico", "^\\d+$", Severity.ERROR));
+        vs.registerValidator(cmbIdMarca, true, Validator.createEmptyValidator("Marca requerida"));
         vs.registerValidator(txtNombre, true, Validator.createEmptyValidator("Nombre requerido"));
         vs.registerValidator(txtAspecto, true, Validator.createEmptyValidator("Aspecto requerido"));
         vs.registerValidator(txtProcedimientos, true, Validator.createEmptyValidator("Procedimientos requerido"));
@@ -66,7 +73,11 @@ public class CervezaFormController {
     @FXML
     public void onGuardar() {
         try {
-            Integer idMarca = Integer.parseInt(txtIdMarca.getText().trim());
+            Integer idMarca = cmbIdMarca.getValue();
+            if (idMarca == null) {
+                showError("Selecciona una marca válida.");
+                return;
+            }
             String nombre = txtNombre.getText().trim();
             String aspecto = txtAspecto.getText().trim();
             String proc = txtProcedimientos.getText().trim();
@@ -93,7 +104,7 @@ public class CervezaFormController {
     }
 
     @FXML public void onLimpiar() {
-        txtIdMarca.clear();
+        cmbIdMarca.getSelectionModel().clearSelection();
         txtNombre.clear();
         txtAspecto.clear();
         txtProcedimientos.clear();

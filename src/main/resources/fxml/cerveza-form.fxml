@@ -19,7 +19,7 @@
 
 
                 <Label text="Marca (ID)" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtIdMarca" promptText="ej. 1" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="cmbIdMarca" promptText="Selecciona una marca" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
 
                 <Label text="Nombre" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
