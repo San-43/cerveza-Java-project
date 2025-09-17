@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.cerveza.cerveza.controller.SearchController">
+    <children>
+        <VBox spacing="16" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" styleClass="card">
+            <Label text="Buscador" styleClass="h1"/>
+            <TabPane tabClosingPolicy="UNAVAILABLE">
+                <tabs>
+                    <Tab text="Cervezas">
+                        <content>
+                            <VBox spacing="12">
+                                <padding>
+                                    <Insets top="10" right="10" bottom="10" left="10"/>
+                                </padding>
+                                <GridPane hgap="10" vgap="10">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="25"/>
+                                        <ColumnConstraints percentWidth="75"/>
+                                    </columnConstraints>
+
+                                    <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCervezaId" promptText="Exacto" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                    <Label text="ID Marca" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCervezaIdMarca" promptText="Exacto" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                    <Label text="Nombre" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCervezaNombre" promptText="Contiene" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                    <Label text="Aspecto" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCervezaAspecto" promptText="Contiene" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                    <Label text="Procedimientos" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtCervezaProcedimientos" promptText="Contiene" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                                    <Label text="Graduación (%)" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                    <HBox spacing="6" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                                        <TextField fx:id="txtCervezaGradMin" promptText="Mín"/>
+                                        <Label text="-" alignment="CENTER"/>
+                                        <TextField fx:id="txtCervezaGradMax" promptText="Máx"/>
+                                    </HBox>
+
+                                    <Label text="Existencia total" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                    <HBox spacing="6" GridPane.rowIndex="6" GridPane.columnIndex="1">
+                                        <TextField fx:id="txtCervezaExistMin" promptText="Mín"/>
+                                        <Label text="-" alignment="CENTER"/>
+                                        <TextField fx:id="txtCervezaExistMax" promptText="Máx"/>
+                                    </HBox>
+                                </GridPane>
+
+                                <HBox spacing="10" alignment="CENTER_RIGHT">
+                                    <Button text="Recargar" onAction="#onRecargarCervezas"/>
+                                    <Button text="Limpiar filtros" onAction="#onLimpiarFiltrosCerveza"/>
+                                </HBox>
+
+                                <TableView fx:id="tblCervezas" prefHeight="280">
+                                    <columns>
+                                        <TableColumn fx:id="colCerId" text="ID" prefWidth="70"/>
+                                        <TableColumn fx:id="colCerIdMarca" text="ID Marca" prefWidth="90"/>
+                                        <TableColumn fx:id="colCerNombre" text="Nombre" prefWidth="160"/>
+                                        <TableColumn fx:id="colCerAspecto" text="Aspecto" prefWidth="140"/>
+                                        <TableColumn fx:id="colCerProcedimientos" text="Procedimientos" prefWidth="220"/>
+                                        <TableColumn fx:id="colCerGraduacion" text="Graduación" prefWidth="110"/>
+                                        <TableColumn fx:id="colCerExistTotal" text="Existencia Total" prefWidth="140"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <Tab text="Existencias">
+                        <content>
+                            <VBox spacing="12">
+                                <padding>
+                                    <Insets top="10" right="10" bottom="10" left="10"/>
+                                </padding>
+                                <GridPane hgap="10" vgap="10">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="25"/>
+                                        <ColumnConstraints percentWidth="75"/>
+                                    </columnConstraints>
+
+                                    <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtExistId" promptText="Exacto" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                    <Label text="ID Expendio" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtExistIdExpendio" promptText="Exacto" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                    <Label text="Nombre expendio" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtExistNombreExpendio" promptText="Contiene" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                    <Label text="ID Presentación" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtExistIdPresentacion" promptText="Exacto" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                    <Label text="Nombre presentación" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="txtExistNombrePresentacion" promptText="Contiene" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                                    <Label text="Cantidad" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                    <HBox spacing="6" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                                        <TextField fx:id="txtExistCantidadMin" promptText="Mín"/>
+                                        <Label text="-" alignment="CENTER"/>
+                                        <TextField fx:id="txtExistCantidadMax" promptText="Máx"/>
+                                    </HBox>
+
+                                    <Label text="Fecha" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                    <HBox spacing="6" GridPane.rowIndex="6" GridPane.columnIndex="1">
+                                        <DatePicker fx:id="dpExistFechaDesde" promptText="Desde"/>
+                                        <Label text="-" alignment="CENTER"/>
+                                        <DatePicker fx:id="dpExistFechaHasta" promptText="Hasta"/>
+                                    </HBox>
+                                </GridPane>
+
+                                <HBox spacing="10" alignment="CENTER_RIGHT">
+                                    <Button text="Recargar" onAction="#onRecargarExistencias"/>
+                                    <Button text="Limpiar filtros" onAction="#onLimpiarFiltrosExistencia"/>
+                                </HBox>
+
+                                <TableView fx:id="tblExistencias" prefHeight="280">
+                                    <columns>
+                                        <TableColumn fx:id="colExistId" text="ID" prefWidth="70"/>
+                                        <TableColumn fx:id="colExistIdExpendio" text="ID Expendio" prefWidth="90"/>
+                                        <TableColumn fx:id="colExistNombreExpendio" text="Expendio" prefWidth="180"/>
+                                        <TableColumn fx:id="colExistIdPresentacion" text="ID Presentación" prefWidth="110"/>
+                                        <TableColumn fx:id="colExistNombrePresentacion" text="Presentación" prefWidth="220"/>
+                                        <TableColumn fx:id="colExistCantidad" text="Cantidad" prefWidth="90"/>
+                                        <TableColumn fx:id="colExistFecha" text="Fecha" prefWidth="120"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                        </content>
+                    </Tab>
+                </tabs>
+            </TabPane>
+        </VBox>
+    </children>
+</AnchorPane>
