@@ -35,4 +35,17 @@ public class Cerveza {
     public void setGraduacion(Double graduacion) { this.graduacion = graduacion; }
     public Integer getExistenciaTotal() { return existenciaTotal; }
     public void setExistenciaTotal(Integer existenciaTotal) { this.existenciaTotal = existenciaTotal; }
+
+    @Override
+    public String toString() {
+        return "Cerveza{" +
+                "id=" + id +
+                ", idMarca=" + idMarca +
+                ", nombre='" + nombre + '\'' +
+                ", aspecto='" + aspecto + '\'' +
+                ", procedimientos='" + procedimientos + '\'' +
+                ", graduacion=" + graduacion +
+                ", existenciaTotal=" + existenciaTotal +
+                '}';
+    }
 }
