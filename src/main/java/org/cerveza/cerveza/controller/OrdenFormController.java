@@ -24,19 +24,63 @@ public class OrdenFormController {
     @FXML private TableColumn<Orden, Integer> colIdOrden, colIdPresentacion, colCantidad;
     @FXML private TableColumn<Orden, Date> colFechaOrden, colFechaDespacho;
     @FXML private DatePicker dpFechaOrden, dpFechaDespacho;
+    @FXML private TextField txtBuscar;
+    @FXML private ComboBox<String> cbBuscarPor;
+    @FXML private Button btnListar;
 
     private final OrdenDao dao = new OrdenDaoImpl();
     private final ValidationSupport vs = new ValidationSupport();
+    private javafx.collections.ObservableList<Orden> ordenes;
+    private javafx.collections.transformation.FilteredList<Orden> filteredOrdenes;
 
     @FXML
     public void initialize() {
         // Table setup
         colIdOrden.setCellValueFactory(new PropertyValueFactory<>("idOrden"));
+        // Cambiar para mostrar displayName en vez de id en la columna Presentación
         colIdPresentacion.setCellValueFactory(new PropertyValueFactory<>("idPresentacion"));
+        colIdPresentacion.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Integer idPresentacion, boolean empty) {
+                super.updateItem(idPresentacion, empty);
+                if (empty || idPresentacion == null) {
+                    setText("");
+                } else {
+                    OrdenDao.IdName match = null;
+                    if (cmbPresentacion != null && cmbPresentacion.getItems() != null) {
+                        for (OrdenDao.IdName item : cmbPresentacion.getItems()) {
+                            if (item.idPresentacion == idPresentacion) {
+                                match = item;
+                                break;
+                            }
+                        }
+                    }
+                    setText(match != null ? match.displayName : String.valueOf(idPresentacion));
+                }
+            }
+        });
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colFechaOrden.setCellValueFactory(new PropertyValueFactory<>("fecha_orden"));
         colFechaDespacho.setCellValueFactory(new PropertyValueFactory<>("fecha_despacho"));
-        refreshTable();
+        // Tabla vacía al inicio
+        ordenes = FXCollections.observableArrayList();
+        filteredOrdenes = new javafx.collections.transformation.FilteredList<>(ordenes, p -> true);
+        tblOrdenes.setItems(filteredOrdenes);
+
+        // Configurar ComboBox de búsqueda
+        if (cbBuscarPor != null) {
+            cbBuscarPor.setItems(FXCollections.observableArrayList(
+                "ID Orden", "Presentación", "Cantidad", "Fecha Orden", "Fecha Despacho"
+            ));
+            cbBuscarPor.getSelectionModel().select("ID Orden");
+            cbBuscarPor.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        }
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> aplicarFiltroBusqueda());
+        }
+        if (btnListar != null) {
+            btnListar.setOnAction(e -> onListar());
+        }
 
         // Table selection listener to fill form
         tblOrdenes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -153,9 +197,56 @@ public class OrdenFormController {
         dpFechaDespacho.setValue(null);
     }
 
-    private void refreshTable() {
+    @FXML
+    public void onListar() {
         try {
-            tblOrdenes.setItems(FXCollections.observableArrayList(dao.findAll()));
+            ordenes.setAll(dao.findAll());
+            aplicarFiltroBusqueda();
+        } catch (Exception ex) {
+            showError("Error al cargar órdenes: " + ex.getMessage());
+        }
+    }
+
+    private void aplicarFiltroBusqueda() {
+        if (filteredOrdenes == null || ordenes == null) return;
+        String filtro = txtBuscar != null ? txtBuscar.getText() : null;
+        String atributo = cbBuscarPor != null ? cbBuscarPor.getValue() : null;
+        filteredOrdenes.setPredicate(orden -> {
+            if (filtro == null || filtro.isEmpty() || atributo == null) return true;
+            String lowerFiltro = filtro.toLowerCase();
+            switch (atributo) {
+                case "ID Orden":
+                    return String.valueOf(orden.getIdOrden()).contains(lowerFiltro);
+                case "Presentación": {
+                    // Buscar por displayName de la presentacion
+                    OrdenDao.IdName match = null;
+                    if (cmbPresentacion != null && cmbPresentacion.getItems() != null) {
+                        for (OrdenDao.IdName item : cmbPresentacion.getItems()) {
+                            if (item.idPresentacion == orden.getIdPresentacion()) {
+                                match = item;
+                                break;
+                            }
+                        }
+                    }
+                    return match != null && match.displayName.toLowerCase().contains(lowerFiltro);
+                }
+                case "Cantidad":
+                    return String.valueOf(orden.getCantidad()).contains(lowerFiltro);
+                case "Fecha Orden":
+                    return orden.getFecha_orden() != null && orden.getFecha_orden().toString().toLowerCase().contains(lowerFiltro);
+                case "Fecha Despacho":
+                    return orden.getFecha_despacho() != null && orden.getFecha_despacho().toString().toLowerCase().contains(lowerFiltro);
+                default:
+                    return true;
+            }
+        });
+    }
+
+    private void refreshTable() {
+        // Ya no se usa para listar inicial, pero se puede mantener para otros usos internos
+        try {
+            ordenes.setAll(dao.findAll());
+            aplicarFiltroBusqueda();
         } catch (Exception ex) {
             showError("Error al cargar órdenes: " + ex.getMessage());
         }

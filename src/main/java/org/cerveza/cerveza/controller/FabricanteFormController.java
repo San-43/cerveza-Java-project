@@ -2,6 +2,7 @@ package org.cerveza.cerveza.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert;
@@ -22,10 +23,14 @@ public class FabricanteFormController {
     @FXML private Button btnActualizar;
     @FXML private Button btnEliminar;
     @FXML private Button btnLimpiar;
+    @FXML private Button btnListar;
     @FXML private Label lblError;
+    @FXML private TextField txtBuscar;
+    @FXML private ComboBox<String> cbBuscarPor;
 
     private final FabricanteDaoImpl dao = new FabricanteDaoImpl();
     private ObservableList<Fabricante> fabricantes;
+    private FilteredList<Fabricante> filteredFabricantes;
 
     @FXML
     public void initialize() {
@@ -33,17 +38,41 @@ public class FabricanteFormController {
         colNombre.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getNombre()));
         colPais.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getPais()));
         colDescripcion.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getDescripcion()));
-        cargarFabricantes();
+        // NO cargarFabricantes() aquí para que la tabla esté vacía al inicio
+        filteredFabricantes = new FilteredList<>(FXCollections.observableArrayList(), p -> true);
+        fabricanteTable.setItems(filteredFabricantes);
+
+        if (cbBuscarPor != null) {
+            cbBuscarPor.setItems(FXCollections.observableArrayList("ID", "Nombre", "País", "Descripción"));
+            cbBuscarPor.getSelectionModel().select("Nombre"); // Valor por defecto
+            cbBuscarPor.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        }
+
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> aplicarFiltroBusqueda());
+        }
+
         fabricanteTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             mostrarFabricante(newSel);
             btnGuardar.setDisable(newSel != null);
+            btnActualizar.setDisable(newSel == null);
         });
-        btnGuardar.setDisable(false); // Ensure enabled on startup
+        btnGuardar.setDisable(false);
+        btnActualizar.setDisable(true);
+
+        if (btnListar != null) {
+            btnListar.setOnAction(event -> listarFabricantes());
+        }
     }
 
     private void cargarFabricantes() {
         fabricantes = FXCollections.observableArrayList(dao.obtenerTodos());
-        fabricanteTable.setItems(fabricantes);
+        if (filteredFabricantes != null) {
+            filteredFabricantes = new FilteredList<>(fabricantes, filteredFabricantes.getPredicate());
+            fabricanteTable.setItems(filteredFabricantes);
+        } else {
+            fabricanteTable.setItems(fabricantes);
+        }
     }
 
     private void mostrarFabricante(Fabricante fabricante) {
@@ -138,16 +167,45 @@ public class FabricanteFormController {
         txtPais.clear();
         txtDescripcion.clear();
         fabricanteTable.getSelectionModel().clearSelection();
-        btnGuardar.setDisable(false); // Enable Guardar after clearing
+        btnGuardar.setDisable(false); // Habilitar Guardar después de limpiar
+        btnActualizar.setDisable(true); // Desactiva actualizar al limpiar
     }
 
     @FXML
     private void onDescripcionKeyPressed(javafx.scene.input.KeyEvent event) {
-        // Prevent Ctrl+A, Alt+A, or any shortcut that opens a file dialog
+        // Prevenir Ctrl+A, Alt+A, o cualquier atajo que abra un diálogo de archivos
         if ((event.isControlDown() || event.isAltDown()) && event.getCode().toString().equalsIgnoreCase("A")) {
             event.consume();
         }
-        // Optionally, block just 'A' if needed
+        // Opcionalmente, bloquear solo 'A' si es necesario
         // if (event.getCode().toString().equalsIgnoreCase("A")) event.consume();
+    }
+
+    private void aplicarFiltroBusqueda() {
+        if (filteredFabricantes == null || fabricantes == null) return;
+        String filtro = txtBuscar.getText();
+        String atributo = cbBuscarPor.getValue();
+        filteredFabricantes.setPredicate(fabricante -> {
+            if (filtro == null || filtro.isEmpty() || atributo == null) return true;
+            String lowerFiltro = filtro.toLowerCase();
+            switch (atributo) {
+                case "ID":
+                    return String.valueOf(fabricante.getIdFabricante()).contains(lowerFiltro);
+                case "Nombre":
+                    return fabricante.getNombre() != null && fabricante.getNombre().toLowerCase().contains(lowerFiltro);
+                case "País":
+                    return fabricante.getPais() != null && fabricante.getPais().toLowerCase().contains(lowerFiltro);
+                case "Descripción":
+                    return fabricante.getDescripcion() != null && fabricante.getDescripcion().toLowerCase().contains(lowerFiltro);
+                default:
+                    return true;
+            }
+        });
+    }
+
+    @FXML
+    private void listarFabricantes() {
+        cargarFabricantes();
+        mostrarFabricante(null);
     }
 }

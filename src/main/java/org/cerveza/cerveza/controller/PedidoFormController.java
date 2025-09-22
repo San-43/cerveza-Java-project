@@ -14,14 +14,34 @@ public class PedidoFormController {
     @FXML private Button btnGuardar, btnActualizar, btnEliminar;
     @FXML private TableView<Pedido> tblPedidos;
     @FXML private TableColumn<Pedido, Integer> colIdPedido, colIdExpendio;
+    @FXML private TextField txtBuscar;
+    @FXML private ComboBox<String> cbBuscarPor;
+    @FXML private Button btnListar;
 
     private PedidoDaoImpl pedidoDao = new PedidoDaoImpl();
+    private javafx.collections.ObservableList<Pedido> pedidosData;
+    private javafx.collections.transformation.FilteredList<Pedido> filteredPedidos;
 
     @FXML
     public void initialize() {
         colIdPedido.setCellValueFactory(new PropertyValueFactory<>("idpedido"));
         colIdExpendio.setCellValueFactory(new PropertyValueFactory<>("idexpendio"));
-        refreshTable();
+        // Tabla vacía al inicio
+        pedidosData = FXCollections.observableArrayList();
+        filteredPedidos = new javafx.collections.transformation.FilteredList<>(pedidosData, p -> true);
+        tblPedidos.setItems(filteredPedidos);
+        // Configurar ComboBox de búsqueda
+        if (cbBuscarPor != null) {
+            cbBuscarPor.setItems(FXCollections.observableArrayList("ID Pedido", "ID Expendio"));
+            cbBuscarPor.getSelectionModel().select("ID Pedido");
+            cbBuscarPor.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        }
+        if (txtBuscar != null) {
+            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> aplicarFiltroBusqueda());
+        }
+        if (btnListar != null) {
+            btnListar.setOnAction(e -> onListar());
+        }
         btnActualizar.setDisable(true);
         btnGuardar.setDisable(false);
         tblPedidos.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -37,8 +57,10 @@ public class PedidoFormController {
     }
 
     private void refreshTable() {
+        // Ya no se usa para listar inicial, pero se puede mantener para otros usos internos
         List<Pedido> pedidos = pedidoDao.findAll();
-        tblPedidos.setItems(FXCollections.observableArrayList(pedidos));
+        pedidosData.setAll(pedidos);
+        aplicarFiltroBusqueda();
     }
 
     private void fillForm(Pedido pedido) {
@@ -102,6 +124,31 @@ public class PedidoFormController {
                 showError("Error al actualizar: " + e.getMessage());
             }
         }
+    }
+
+    @FXML
+    private void onListar() {
+        List<Pedido> pedidos = pedidoDao.findAll();
+        pedidosData.setAll(pedidos);
+        aplicarFiltroBusqueda();
+    }
+
+    private void aplicarFiltroBusqueda() {
+        if (filteredPedidos == null || pedidosData == null) return;
+        String filtro = txtBuscar != null ? txtBuscar.getText() : null;
+        String atributo = cbBuscarPor != null ? cbBuscarPor.getValue() : null;
+        filteredPedidos.setPredicate(pedido -> {
+            if (filtro == null || filtro.isEmpty() || atributo == null) return true;
+            String lowerFiltro = filtro.toLowerCase();
+            switch (atributo) {
+                case "ID Pedido":
+                    return String.valueOf(pedido.getIdpedido()).contains(lowerFiltro);
+                case "ID Expendio":
+                    return String.valueOf(pedido.getIdexpendio()).contains(lowerFiltro);
+                default:
+                    return true;
+            }
+        });
     }
 
     @FXML

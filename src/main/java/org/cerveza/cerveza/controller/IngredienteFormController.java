@@ -50,6 +50,12 @@ public class IngredienteFormController {
     @FXML
     private TextField txtBuscar;
 
+    @FXML
+    private ComboBox<String> cbBuscarPor;
+
+    @FXML
+    private Button btnListar;
+
     private FilteredList<Ingrediente> filteredData;
 
     @FXML
@@ -63,24 +69,26 @@ public class IngredienteFormController {
         // Enlazar la lista de datos con la tabla usando FilteredList
         filteredData = new FilteredList<>(data, p -> true);
         tblIngredientes.setItems(filteredData);
-        if (txtBuscar != null) {
-            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> {
-                filteredData.setPredicate(ingrediente -> {
-                    if (newValue == null || newValue.isEmpty()) {
-                        return true;
-                    }
-                    String lowerCaseFilter = newValue.toLowerCase();
-                    // Buscar por id, nombre o descripción
-                    boolean matchesId = String.valueOf(ingrediente.getIdIngrediente()).contains(lowerCaseFilter);
-                    boolean matchesNombre = ingrediente.getNombre().toLowerCase().contains(lowerCaseFilter);
-                    boolean matchesDescripcion = ingrediente.getDescripcion() != null && ingrediente.getDescripcion().toLowerCase().contains(lowerCaseFilter);
-                    return matchesId || matchesNombre || matchesDescripcion;
-                });
-            });
+
+        // Configurar acción del botón Listar
+        if (btnListar != null) {
+            btnListar.setOnAction(event -> refrescarTabla());
         }
 
-        // Cargar los datos desde la base
-        refrescarTabla();
+        // Configurar ComboBox de búsqueda
+        if (cbBuscarPor != null) {
+            cbBuscarPor.setItems(FXCollections.observableArrayList("ID", "Nombre", "Descripción"));
+            cbBuscarPor.getSelectionModel().select("Nombre"); // Valor por defecto
+        }
+
+        // Configurar filtro de búsqueda
+        if (txtBuscar != null && cbBuscarPor != null) {
+            txtBuscar.textProperty().addListener((obs, oldValue, newValue) -> aplicarFiltroBusqueda());
+            cbBuscarPor.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        }
+
+        // Cargar datos iniciales en la tabla
+        // refrescarTabla();
 
         // Cuando seleccione un ingrediente en la tabla, cargar en los TextFields
         tblIngredientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -89,6 +97,25 @@ public class IngredienteFormController {
                 txtNombre.setText(newSel.getNombre());
                 txtDescripcion.setText(newSel.getDescripcion());
                 editingId = newSel.getIdIngrediente();
+            }
+        });
+    }
+
+    private void aplicarFiltroBusqueda() {
+        String filtro = txtBuscar.getText();
+        String atributo = cbBuscarPor.getValue();
+        filteredData.setPredicate(ingrediente -> {
+            if (filtro == null || filtro.isEmpty() || atributo == null) return true;
+            String lowerFiltro = filtro.toLowerCase();
+            switch (atributo) {
+                case "ID":
+                    return String.valueOf(ingrediente.getIdIngrediente()).contains(lowerFiltro);
+                case "Nombre":
+                    return ingrediente.getNombre() != null && ingrediente.getNombre().toLowerCase().contains(lowerFiltro);
+                case "Descripción":
+                    return ingrediente.getDescripcion() != null && ingrediente.getDescripcion().toLowerCase().contains(lowerFiltro);
+                default:
+                    return true;
             }
         });
     }
@@ -162,6 +189,7 @@ public class IngredienteFormController {
         a.setHeaderText("Confirmar");
         return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
+    @FXML
     private void refrescarTabla() {
         try {
             data.setAll(dao.findAll());

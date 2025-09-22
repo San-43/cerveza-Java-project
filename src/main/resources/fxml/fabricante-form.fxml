@@ -1,32 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.cerveza.cerveza.controller.FabricanteFormController"
-            prefHeight="400.0" prefWidth="600.0">
-    <TableView fx:id="fabricanteTable" layoutX="20" layoutY="20" prefWidth="560" prefHeight="180" onMouseClicked="#onTableClicked">
+<AnchorPane prefHeight="499.0" prefWidth="745.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.cerveza.cerveza.controller.FabricanteFormController">
+    <TextField fx:id="txtBuscar" layoutX="312.0" layoutY="31.0" prefWidth="260" promptText="Buscar por id, nombre, país o descripción..." />
+    <TableView fx:id="fabricanteTable" layoutX="12.0" layoutY="57.0" onMouseClicked="#onTableClicked" prefHeight="180" prefWidth="560">
         <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="60" />
-            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="140" />
-            <TableColumn fx:id="colPais" text="País" prefWidth="140" />
-            <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="220" />
+            <TableColumn fx:id="colId" prefWidth="60" text="ID" />
+            <TableColumn fx:id="colNombre" prefWidth="140" text="Nombre" />
+            <TableColumn fx:id="colPais" prefWidth="140" text="País" />
+            <TableColumn fx:id="colDescripcion" prefWidth="220" text="Descripción" />
         </columns>
     </TableView>
-    <Label layoutX="20" layoutY="220" text="Nombre:" />
-    <TextField fx:id="txtNombre" layoutX="80" layoutY="215" prefWidth="180" />
-    <Label layoutX="280" layoutY="220" text="País:" />
-    <TextField fx:id="txtPais" layoutX="330" layoutY="215" prefWidth="120" />
-    <Label layoutX="20" layoutY="260" text="Descripción:" />
-    <TextField fx:id="txtDescripcion" layoutX="100" layoutY="255" prefWidth="350" onKeyPressed="#onDescripcionKeyPressed" />
-    <Button fx:id="btnGuardar" layoutX="470" layoutY="215" text="Guardar" onAction="#guardarFabricante" />
-    <Button fx:id="btnActualizar" layoutX="470" layoutY="255" text="Actualizar" onAction="#actualizarFabricante" />
-    <Button fx:id="btnEliminar" layoutX="470" layoutY="295" text="Eliminar" onAction="#eliminarFabricante" />
+    <Label layoutX="20.0" layoutY="250.0" text="Nombre:" />
+    <TextField fx:id="txtNombre" layoutX="80.0" layoutY="246.0" prefWidth="180" />
+    <Label layoutX="280.0" layoutY="250.0" text="País:" />
+    <TextField fx:id="txtPais" layoutX="330.0" layoutY="246.0" prefWidth="120" />
+    <Label layoutX="20.0" layoutY="280.0" text="Descripción:" />
+    <TextField fx:id="txtDescripcion" layoutX="100.0" layoutY="276.0" onKeyPressed="#onDescripcionKeyPressed" prefWidth="350" />
+    <Button fx:id="btnGuardar" layoutX="14.0" layoutY="332.0" onAction="#guardarFabricante" text="Guardar" />
+    <Button fx:id="btnActualizar" layoutX="85.0" layoutY="332.0" onAction="#actualizarFabricante" text="Actualizar" />
+    <Button fx:id="btnEliminar" layoutX="170.0" layoutY="332.0" onAction="#eliminarFabricante" text="Eliminar" />
     <Label fx:id="lblError" layoutX="20" layoutY="375" textFill="red" />
-    <Button fx:id="btnLimpiar" layoutX="470" layoutY="335" text="Limpiar" onAction="#limpiarCampos" />
+    <Button fx:id="btnLimpiar" layoutX="247.0" layoutY="332.0" onAction="#limpiarCampos" text="Limpiar" />
+   <Label layoutX="127.0" layoutY="35.0" text="Buscador:" />
+    <ComboBox fx:id="cbBuscarPor" layoutX="192.0" layoutY="31.0" prefWidth="110" promptText="Buscar por..." />
+    <Button fx:id="btnListar" layoutX="30.0" layoutY="31.0" onAction="#listarFabricantes" text="Listar" />
 </AnchorPane>

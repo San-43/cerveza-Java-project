@@ -19,6 +19,12 @@
                 <Label text="ID Expendio" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <TextField fx:id="txtIdExpendio" promptText="ej. 10" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             </GridPane>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Buscar:" />
+                <ComboBox fx:id="cbBuscarPor" prefWidth="130" promptText="Buscar por..." />
+                <TextField fx:id="txtBuscar" promptText="Ingrese búsqueda..." prefWidth="200" />
+                <Button fx:id="btnListar" text="Listar" onAction="#onListar" />
+            </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="10">
                 <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
                 <Button fx:id="btnActualizar" onAction="#onActualizar" text="Actualizar" disable="true" />
