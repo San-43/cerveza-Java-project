@@ -27,8 +27,15 @@ public class VentaFormController {
     @FXML private TableColumn<Venta, LocalDate> colFecha;
     @FXML private TableColumn<Venta, Integer> colCantidad;
 
+    @FXML private ComboBox<String> cmbBusqueda;
+    @FXML private TextField txtBusqueda;
+    @FXML private Button btnActualizar;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnEliminar;
+
     private final VentaDaoImpl dao = new VentaDaoImpl();
     private Venta seleccionado;
+    private javafx.collections.ObservableList<Venta> todasLasVentas = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -37,17 +44,34 @@ public class VentaFormController {
         colPresentacion.setCellValueFactory(new PropertyValueFactory<>("idpresentacion"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-
         cargarCombos();
-        refrescarTabla();
-
-        tblVentas.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
-            seleccionado = b;
-            if (b != null) {
-                selectComboById(cboExpendio, b.getIdexpendio());
-                selectComboById(cboPresentacion, b.getIdpresentacion());
-                dpFecha.setValue(b.getFecha());
-                txtCantidad.setText(String.valueOf(b.getCantidad()));
+        // Buscador
+        cmbBusqueda.setItems(FXCollections.observableArrayList("ID", "Expendio", "Presentación", "Fecha", "Cantidad"));
+        cmbBusqueda.setPromptText("Elige un campo...");
+        cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        // Estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+        // No cargar registros al iniciar
+        tblVentas.setItems(FXCollections.observableArrayList());
+        tblVentas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        // Selección en tabla
+        tblVentas.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            seleccionado = sel;
+            if (sel != null) {
+                selectComboById(cboExpendio, sel.getIdexpendio());
+                selectComboById(cboPresentacion, sel.getIdpresentacion());
+                dpFecha.setValue(sel.getFecha());
+                txtCantidad.setText(String.valueOf(sel.getCantidad()));
+                btnActualizar.setDisable(false);
+                btnGuardar.setDisable(true);
+                btnEliminar.setDisable(false);
+            } else {
+                btnActualizar.setDisable(true);
+                btnGuardar.setDisable(false);
+                btnEliminar.setDisable(true);
             }
         });
     }
@@ -87,9 +111,49 @@ public class VentaFormController {
     }
 
     private void refrescarTabla() {
-        tblVentas.setItems(FXCollections.observableArrayList(dao.findAll()));
+        todasLasVentas.setAll(dao.findAll());
+        aplicarFiltroBusqueda();
+        onNuevo();
     }
-
+    private void aplicarFiltroBusqueda() {
+        String campo = cmbBusqueda.getValue();
+        String texto = txtBusqueda.getText();
+        if (campo == null || texto == null || texto.isBlank()) {
+            tblVentas.setItems(FXCollections.observableArrayList());
+            tblVentas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            return;
+        }
+        if (todasLasVentas.isEmpty()) {
+            todasLasVentas.setAll(dao.findAll());
+        }
+        javafx.collections.ObservableList<Venta> resultados = FXCollections.observableArrayList();
+        for (Venta v : todasLasVentas) {
+            switch (campo) {
+                case "ID":
+                    if (String.valueOf(v.getIdventa()).contains(texto)) resultados.add(v);
+                    break;
+                case "Expendio":
+                    if (String.valueOf(v.getIdexpendio()).contains(texto)) resultados.add(v);
+                    break;
+                case "Presentación":
+                    if (String.valueOf(v.getIdpresentacion()).contains(texto)) resultados.add(v);
+                    break;
+                case "Fecha":
+                    if (v.getFecha() != null && v.getFecha().toString().contains(texto)) resultados.add(v);
+                    break;
+                case "Cantidad":
+                    if (String.valueOf(v.getCantidad()).contains(texto)) resultados.add(v);
+                    break;
+            }
+        }
+        if (resultados.isEmpty()) {
+            tblVentas.setItems(FXCollections.observableArrayList());
+            tblVentas.setPlaceholder(new Label("No se encontró en la base de datos"));
+        } else {
+            tblVentas.setItems(resultados);
+            tblVentas.setPlaceholder(new Label(" "));
+        }
+    }
     @FXML
     private void onNuevo() {
         tblVentas.getSelectionModel().clearSelection();
@@ -98,8 +162,12 @@ public class VentaFormController {
         cboPresentacion.getSelectionModel().clearSelection();
         dpFecha.setValue(null);
         txtCantidad.clear();
+        txtBusqueda.clear();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
     }
-
     @FXML
     private void onGuardar() {
         var expendio = cboExpendio.getSelectionModel().getSelectedItem();
@@ -123,7 +191,37 @@ public class VentaFormController {
         refrescarTabla();
         onNuevo();
     }
-
+    @FXML
+    private void onActualizar() {
+        Venta sel = tblVentas.getSelectionModel().getSelectedItem();
+        if (sel == null) { info("Selecciona una venta para actualizar", ""); return; }
+        var expendio = cboExpendio.getSelectionModel().getSelectedItem();
+        var present = cboPresentacion.getSelectionModel().getSelectedItem();
+        var fecha = dpFecha.getValue();
+        var cantidadStr = txtCantidad.getText();
+        if (expendio == null || present == null || fecha == null || cantidadStr.isBlank()) {
+            info("Completa expendio, presentación, fecha y cantidad", "");
+            return;
+        }
+        int cantidad = Integer.parseInt(cantidadStr);
+        boolean hayCambios =
+            expendio.id != sel.getIdexpendio() ||
+            present.id != sel.getIdpresentacion() ||
+            !fecha.equals(sel.getFecha()) ||
+            cantidad != sel.getCantidad();
+        if (!hayCambios) {
+            info("Sin cambios", "No hay cambios por guardar.");
+            return;
+        }
+        sel.setIdexpendio(expendio.id);
+        sel.setIdpresentacion(present.id);
+        sel.setFecha(fecha);
+        sel.setCantidad(cantidad);
+        dao.update(sel);
+        refrescarTabla();
+        onNuevo();
+        info("Actualizado", "Venta actualizada correctamente");
+    }
     @FXML
     private void onEliminar() {
         Venta v = tblVentas.getSelectionModel().getSelectedItem();
@@ -135,6 +233,7 @@ public class VentaFormController {
             onNuevo();
         }
     }
+    private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
 
     public static class ComboItem {
         public final int id; public final String nombre;

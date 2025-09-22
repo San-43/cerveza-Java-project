@@ -27,9 +27,14 @@ public class ExpendioFormController {
     @FXML private Button btnNuevo;
     @FXML private Button btnGuardar;
     @FXML private Button btnEliminar;
+    @FXML private ComboBox<String> cmbBusqueda;
+    @FXML private TextField txtBusqueda;
+    @FXML private Button btnActualizar;
 
     private final ExpendioDao dao = new ExpendioDaoImpl();
     private final ObservableList<Expendio> data = FXCollections.observableArrayList();
+    private java.util.List<Expendio> todosLosExpendios = new java.util.ArrayList<>();
+    private Expendio expendioSeleccionado = null;
 
     @FXML
     public void initialize() {
@@ -39,18 +44,35 @@ public class ExpendioFormController {
         colRFC.setCellValueFactory(c -> new SimpleStringProperty(nullToEmpty(c.getValue().getRfc())));
         colResponsable.setCellValueFactory(c -> new SimpleStringProperty(nullToEmpty(c.getValue().getResponsable())));
         tblExpendios.setItems(data);
-
+        // Buscador
+        cmbBusqueda.setItems(FXCollections.observableArrayList("ID", "Nombre", "Ubicación", "RFC", "Responsable"));
+        cmbBusqueda.setPromptText("Elige un campo...");
+        cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        // Estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+        // Selección en tabla
         tblExpendios.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            btnEliminar.setDisable(sel == null);
-            if (sel == null) return;
-            txtNombre.setText(sel.getNombre());
-            txtUbicacion.setText(sel.getUbicacion());
-            txtRFC.setText(sel.getRfc());
-            txtResponsable.setText(sel.getResponsable());
+            expendioSeleccionado = sel;
+            if (sel != null) {
+                txtNombre.setText(sel.getNombre());
+                txtUbicacion.setText(sel.getUbicacion());
+                txtRFC.setText(sel.getRfc());
+                txtResponsable.setText(sel.getResponsable());
+                btnActualizar.setDisable(false);
+                btnGuardar.setDisable(true);
+                btnEliminar.setDisable(false);
+            } else {
+                btnActualizar.setDisable(true);
+                btnGuardar.setDisable(false);
+                btnEliminar.setDisable(true);
+            }
         });
-
-        refrescarTabla();
-        limpiarForm();
+        // No cargar registros al iniciar
+        tblExpendios.setItems(FXCollections.observableArrayList());
+        tblExpendios.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
     }
 
     @FXML
@@ -113,24 +135,96 @@ public class ExpendioFormController {
         }
     }
 
+    @FXML
+    public void onActualizar() {
+        Expendio sel = tblExpendios.getSelectionModel().getSelectedItem();
+        if (sel == null) { error("Selecciona un expendio para actualizar", ""); return; }
+        try {
+            String nombre = safe(txtNombre.getText());
+            String ubicacion = safe(txtUbicacion.getText());
+            String rfc = safe(txtRFC.getText()).toUpperCase();
+            String responsable = safe(txtResponsable.getText());
+            boolean hayCambios =
+                !nombre.equals(sel.getNombre()) ||
+                !ubicacion.equals(sel.getUbicacion()) ||
+                !rfc.equals(sel.getRfc()) ||
+                !responsable.equals(sel.getResponsable());
+            if (!hayCambios) {
+                info("Sin cambios", "No hay cambios por guardar.");
+                return;
+            }
+            sel.setNombre(nombre);
+            sel.setUbicacion(ubicacion);
+            sel.setRfc(rfc);
+            sel.setResponsable(responsable);
+            dao.update(sel);
+            tblExpendios.refresh();
+            info("Actualizado", "Expendio actualizado correctamente");
+            limpiarForm();
+        } catch (Exception ex) {
+            error("Error al actualizar", ex.getMessage());
+        }
+    }
+
     /* -------- helpers -------- */
 
     private void refrescarTabla() {
         try {
-            data.setAll(dao.findAll());
+            todosLosExpendios = dao.findAll();
         } catch (Exception ex) {
             error("No se pudieron cargar los expendios", ex.getMessage());
+            todosLosExpendios = new java.util.ArrayList<>();
         }
     }
-
+    private void aplicarFiltroBusqueda() {
+        String campo = cmbBusqueda.getValue();
+        String texto = txtBusqueda.getText();
+        if (campo == null || texto == null || texto.isBlank()) {
+            tblExpendios.setItems(FXCollections.observableArrayList());
+            tblExpendios.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            return;
+        }
+        refrescarTabla();
+        java.util.List<Expendio> resultados = new java.util.ArrayList<>();
+        for (Expendio e : todosLosExpendios) {
+            switch (campo) {
+                case "ID":
+                    if (String.valueOf(e.getIdexpendio()).contains(texto)) resultados.add(e);
+                    break;
+                case "Nombre":
+                    if (e.getNombre() != null && e.getNombre().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+                case "Ubicación":
+                    if (e.getUbicacion() != null && e.getUbicacion().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+                case "RFC":
+                    if (e.getRfc() != null && e.getRfc().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+                case "Responsable":
+                    if (e.getResponsable() != null && e.getResponsable().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+            }
+        }
+        if (resultados.isEmpty()) {
+            tblExpendios.setItems(FXCollections.observableArrayList());
+            tblExpendios.setPlaceholder(new Label("No se encontró en la base de datos"));
+        } else {
+            tblExpendios.setItems(FXCollections.observableArrayList(resultados));
+            tblExpendios.setPlaceholder(new Label(" "));
+        }
+    }
     private void limpiarForm() {
         txtNombre.clear();
         txtUbicacion.clear();
         txtRFC.clear();
         txtResponsable.clear();
+        tblExpendios.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
     }
-
     private void error(String header, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setHeaderText(header);
@@ -146,4 +240,5 @@ public class ExpendioFormController {
 
     private static String safe(String s) { return s == null ? "" : s.trim(); }
     private static String nullToEmpty(String s) { return s == null ? "" : s; }
+    private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
 }

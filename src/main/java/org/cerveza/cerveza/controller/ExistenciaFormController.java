@@ -28,8 +28,15 @@ public class ExistenciaFormController {
     @FXML private TableColumn<Existencia, Number> colCantidad;
     @FXML private TableColumn<Existencia, String> colFecha;
 
+    @FXML private ComboBox<String> cmbBusqueda;
+    @FXML private TextField txtBusqueda;
+    @FXML private Button btnActualizar;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnEliminar;
+
     private final ExistenciaDao dao = new ExistenciaDaoImpl();
     private Existencia seleccionado;
+    private ObservableList<Existencia> todasLasExistencias = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
@@ -42,8 +49,19 @@ public class ExistenciaFormController {
         colFecha.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFecha().toString()));
 
         cargarCombos();
-        refrescarTabla();
-
+        // Buscador
+        cmbBusqueda.setItems(FXCollections.observableArrayList("ID", "Expendio", "Presentación", "Cantidad", "Fecha"));
+        cmbBusqueda.setPromptText("Elige un campo...");
+        cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        // Estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+        // No cargar registros al iniciar
+        tblExistencias.setItems(FXCollections.observableArrayList());
+        tblExistencias.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        // Selección en tabla
         tblExistencias.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             seleccionado = b;
             if (b != null) {
@@ -51,6 +69,13 @@ public class ExistenciaFormController {
                 seleccionarComboPorId(cmbPresentacion, b.getIdPresentacion());
                 txtCantidad.setText(Integer.toString(b.getCantidad()));
                 dpFecha.setValue(b.getFecha());
+                btnActualizar.setDisable(false);
+                btnGuardar.setDisable(true);
+                btnEliminar.setDisable(false);
+            } else {
+                btnActualizar.setDisable(true);
+                btnGuardar.setDisable(false);
+                btnEliminar.setDisable(true);
             }
         });
     }
@@ -79,20 +104,6 @@ public class ExistenciaFormController {
 
     private void seleccionarComboPorId(ComboBox<IdName> combo, int id) {
         for (IdName i : combo.getItems()) if (i.id() == id) { combo.getSelectionModel().select(i); break; }
-    }
-
-    private void limpiar() {
-        tblExistencias.getSelectionModel().clearSelection();
-        cmbExpendio.getSelectionModel().clearSelection();
-        cmbPresentacion.getSelectionModel().clearSelection();
-        txtCantidad.clear();
-        dpFecha.setValue(null);
-        seleccionado = null;
-    }
-
-    private void refrescarTabla() {
-        tblExistencias.setItems(FXCollections.observableArrayList(dao.findAllWithLabels()));
-        limpiar();
     }
 
     @FXML
@@ -129,6 +140,45 @@ public class ExistenciaFormController {
     }
 
     @FXML
+    private void onActualizar() {
+        Existencia sel = tblExistencias.getSelectionModel().getSelectedItem();
+        if (sel == null) { error("Selecciona una existencia para actualizar"); return; }
+        try {
+            IdName exp = cmbExpendio.getValue();
+            IdName pre = cmbPresentacion.getValue();
+            String cantStr = txtCantidad.getText();
+            LocalDate fecha = dpFecha.getValue();
+            if (exp == null || pre == null || cantStr == null || cantStr.isBlank() || fecha == null) {
+                error("Completa expendio, presentación, cantidad y fecha.");
+                return;
+            }
+            int cantidad = Integer.parseInt(cantStr);
+            boolean hayCambios =
+                exp.id() != sel.getIdExpendio() ||
+                pre.id() != sel.getIdPresentacion() ||
+                cantidad != sel.getCantidad() ||
+                !fecha.equals(sel.getFecha());
+            if (!hayCambios) {
+                info("Sin cambios", "No hay cambios por guardar.");
+                return;
+            }
+            sel.setIdExpendio(exp.id());
+            sel.setIdPresentacion(pre.id());
+            sel.setCantidad(cantidad);
+            sel.setFecha(fecha);
+            if (dao.update(sel)) {
+                refrescarTabla();
+                info("Actualizado", "Existencia actualizada correctamente");
+            }
+            limpiar();
+        } catch (NumberFormatException ex) {
+            error("Cantidad debe ser numérica.");
+        } catch (Exception ex) {
+            error("Error al actualizar: " + ex.getMessage());
+        }
+    }
+
+    @FXML
     private void onEliminar() {
         Existencia row = tblExistencias.getSelectionModel().getSelectedItem();
         if (row == null) return;
@@ -146,6 +196,63 @@ public class ExistenciaFormController {
 
     private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
     private void error(String m) { Alert a = new Alert(Alert.AlertType.ERROR); a.setHeaderText("Validación"); a.setContentText(m); a.showAndWait(); }
+    private void refrescarTabla() {
+        todasLasExistencias.setAll(dao.findAllWithLabels());
+        aplicarFiltroBusqueda();
+        limpiar();
+    }
+    private void aplicarFiltroBusqueda() {
+        String campo = cmbBusqueda.getValue();
+        String texto = txtBusqueda.getText();
+        if (campo == null || texto == null || texto.isBlank()) {
+            tblExistencias.setItems(FXCollections.observableArrayList());
+            tblExistencias.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            return;
+        }
+        if (todasLasExistencias.isEmpty()) {
+            todasLasExistencias.setAll(dao.findAllWithLabels());
+        }
+        ObservableList<Existencia> resultados = FXCollections.observableArrayList();
+        for (Existencia e : todasLasExistencias) {
+            switch (campo) {
+                case "ID":
+                    if (String.valueOf(e.getIdExistencia()).contains(texto)) resultados.add(e);
+                    break;
+                case "Expendio":
+                    if (e.getExpendioNombre() != null && e.getExpendioNombre().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+                case "Presentación":
+                    if (e.getPresentacionNombre() != null && e.getPresentacionNombre().toLowerCase().contains(texto.toLowerCase())) resultados.add(e);
+                    break;
+                case "Cantidad":
+                    if (String.valueOf(e.getCantidad()).contains(texto)) resultados.add(e);
+                    break;
+                case "Fecha":
+                    if (e.getFecha() != null && e.getFecha().toString().contains(texto)) resultados.add(e);
+                    break;
+            }
+        }
+        if (resultados.isEmpty()) {
+            tblExistencias.setItems(FXCollections.observableArrayList());
+            tblExistencias.setPlaceholder(new Label("No se encontró en la base de datos"));
+        } else {
+            tblExistencias.setItems(resultados);
+            tblExistencias.setPlaceholder(new Label(" "));
+        }
+    }
+    private void limpiar() {
+        tblExistencias.getSelectionModel().clearSelection();
+        cmbExpendio.getSelectionModel().clearSelection();
+        cmbPresentacion.getSelectionModel().clearSelection();
+        txtCantidad.clear();
+        dpFecha.setValue(null);
+        seleccionado = null;
+        txtBusqueda.clear();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+    }
     // record simple para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
 }

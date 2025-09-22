@@ -22,9 +22,13 @@ public class PresentacionFormController {
     @FXML private TableColumn<Presentacion, String> colEnvase;
     @FXML private TableColumn<Presentacion, String> colCerveza;
     @FXML private Button btnNuevo, btnGuardar, btnEliminar;
+    @FXML private ComboBox<String> cmbBusqueda;
+    @FXML private TextField txtBusqueda;
+    @FXML private Button btnActualizar;
 
     private final PresentacionDao dao = new PresentacionDaoImpl();
     private Presentacion seleccionado;
+    private ObservableList<Presentacion> todasLasPresentaciones = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
@@ -33,15 +37,32 @@ public class PresentacionFormController {
                 Optional.ofNullable(c.getValue().getEnvaseNombre()).orElse("id=" + c.getValue().getIdEnvase())));
         colCerveza.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(
                 Optional.ofNullable(c.getValue().getCervezaNombre()).orElse("id=" + c.getValue().getIdCerveza())));
-
         cargarCombos();
-        refrescarTabla();
-
+        // Buscador
+        cmbBusqueda.setItems(FXCollections.observableArrayList("ID", "Envase", "Cerveza"));
+        cmbBusqueda.setPromptText("Elige un campo...");
+        cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        // Estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+        // No cargar registros al iniciar
+        tblPresentaciones.setItems(FXCollections.observableArrayList());
+        tblPresentaciones.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        // Selección en tabla
         tblPresentaciones.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             seleccionado = b;
             if (b != null) {
                 seleccionarComboPorId(cmbEnvase, b.getIdEnvase());
                 seleccionarComboPorId(cmbCerveza, b.getIdCerveza());
+                btnActualizar.setDisable(false);
+                btnGuardar.setDisable(true);
+                btnEliminar.setDisable(false);
+            } else {
+                btnActualizar.setDisable(true);
+                btnGuardar.setDisable(false);
+                btnEliminar.setDisable(true);
             }
         });
     }
@@ -66,17 +87,54 @@ public class PresentacionFormController {
     }
 
     private void refrescarTabla() {
-        tblPresentaciones.setItems(FXCollections.observableArrayList(dao.findAllWithLabels()));
-        tblPresentaciones.getSelectionModel().clearSelection();
-        seleccionado = null;
+        todasLasPresentaciones.setAll(dao.findAllWithLabels());
+        aplicarFiltroBusqueda();
+        onNuevo();
     }
-
+    private void aplicarFiltroBusqueda() {
+        String campo = cmbBusqueda.getValue();
+        String texto = txtBusqueda.getText();
+        if (campo == null || texto == null || texto.isBlank()) {
+            tblPresentaciones.setItems(FXCollections.observableArrayList());
+            tblPresentaciones.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            return;
+        }
+        if (todasLasPresentaciones.isEmpty()) {
+            todasLasPresentaciones.setAll(dao.findAllWithLabels());
+        }
+        ObservableList<Presentacion> resultados = FXCollections.observableArrayList();
+        for (Presentacion p : todasLasPresentaciones) {
+            switch (campo) {
+                case "ID":
+                    if (String.valueOf(p.getIdPresentacion()).contains(texto)) resultados.add(p);
+                    break;
+                case "Envase":
+                    if (p.getEnvaseNombre() != null && p.getEnvaseNombre().toLowerCase().contains(texto.toLowerCase())) resultados.add(p);
+                    break;
+                case "Cerveza":
+                    if (p.getCervezaNombre() != null && p.getCervezaNombre().toLowerCase().contains(texto.toLowerCase())) resultados.add(p);
+                    break;
+            }
+        }
+        if (resultados.isEmpty()) {
+            tblPresentaciones.setItems(FXCollections.observableArrayList());
+            tblPresentaciones.setPlaceholder(new Label("No se encontró en la base de datos"));
+        } else {
+            tblPresentaciones.setItems(resultados);
+            tblPresentaciones.setPlaceholder(new Label(" "));
+        }
+    }
     @FXML
     private void onNuevo() {
         tblPresentaciones.getSelectionModel().clearSelection();
         cmbEnvase.getSelectionModel().clearSelection();
         cmbCerveza.getSelectionModel().clearSelection();
         seleccionado = null;
+        txtBusqueda.clear();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
     }
 
     @FXML
@@ -100,6 +158,30 @@ public class PresentacionFormController {
     }
 
     @FXML
+    private void onActualizar() {
+        Presentacion sel = tblPresentaciones.getSelectionModel().getSelectedItem();
+        if (sel == null) { info("Selecciona una presentación para actualizar", ""); return; }
+        IdName env = cmbEnvase.getValue();
+        IdName cz = cmbCerveza.getValue();
+        if (env == null || cz == null) {
+            info("Selecciona envase y cerveza.", "");
+            return;
+        }
+        boolean hayCambios = env.id() != sel.getIdEnvase() || cz.id() != sel.getIdCerveza();
+        if (!hayCambios) {
+            info("Sin cambios", "No hay cambios por guardar.");
+            return;
+        }
+        sel.setIdEnvase(env.id());
+        sel.setIdCerveza(cz.id());
+        if (dao.update(sel)) {
+            refrescarTabla();
+            info("Actualizado", "Presentación actualizada correctamente");
+        }
+        onNuevo();
+    }
+
+    @FXML
     private void onEliminar() {
         Presentacion row = tblPresentaciones.getSelectionModel().getSelectedItem();
         if (row == null) return;
@@ -115,4 +197,6 @@ public class PresentacionFormController {
 
     // pequeño record para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
+
+    private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
 }

@@ -18,7 +18,7 @@ import java.util.Objects;
 public class CervezaFormController {
 
     @FXML
-    private ComboBox<Integer> cmbIdMarca;
+    private ComboBox<org.cerveza.cerveza.model.Marca> cmbIdMarca;
     @FXML private TextField txtNombre, txtAspecto, txtGraduacion;
     @FXML private TextArea txtProcedimientos;
     @FXML private Button btnGuardar, btnActualizar, btnEliminar;
@@ -48,11 +48,21 @@ public class CervezaFormController {
         tblCervezas.setItems(FXCollections.observableArrayList());
         tblCervezas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
 
-        // Poblar ComboBox de marcas
-        cmbIdMarca.setItems(FXCollections.observableArrayList(
-            marcaDao.findAll().stream().map(m -> m.getId()).toList()
-        ));
+        // Poblar ComboBox de marcas con id y nombre
+        var marcas = marcaDao.findAll();
+        cmbIdMarca.setItems(FXCollections.observableArrayList(marcas));
         cmbIdMarca.setPromptText("Selecciona una marca");
+        cmbIdMarca.setConverter(new StringConverter<org.cerveza.cerveza.model.Marca>() {
+            @Override
+            public String toString(org.cerveza.cerveza.model.Marca marca) {
+                if (marca == null) return "";
+                return marca.getId() + " - " + marca.getNombre();
+            }
+            @Override
+            public org.cerveza.cerveza.model.Marca fromString(String s) {
+                return null; // No se usa
+            }
+        });
 
         // Poblar ComboBox de búsqueda
         cmbBusqueda.setItems(FXCollections.observableArrayList(
@@ -67,10 +77,6 @@ public class CervezaFormController {
         vs.registerValidator(txtProcedimientos, true, Validator.createEmptyValidator("Procedimientos requerido"));
         vs.registerValidator(txtGraduacion, false, Validator.createRegexValidator("Formato decimal ej. 4.5", "^(?:\\d{1,2})(?:\\.\\d{1,2})?$", Severity.ERROR));
 
-        // Deshabilita Guardar si hay errores
-        btnGuardar.disableProperty().bind(Bindings.createBooleanBinding(
-                () -> vs.isInvalid(), vs.invalidProperty()));
-
         // Formateador decimal (opcional, permite vacío)
         txtGraduacion.setTextFormatter(new TextFormatter<>(new StringConverter<String>() {
             @Override public String toString(String object) { return object; }
@@ -81,7 +87,9 @@ public class CervezaFormController {
         tblCervezas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             cervezaSeleccionada = newSel;
             if (newSel != null) {
-                cmbIdMarca.setValue(newSel.getIdMarca());
+                // Buscar la marca correspondiente y seleccionarla
+                org.cerveza.cerveza.model.Marca marcaSel = marcas.stream().filter(m -> m.getId().equals(newSel.getIdMarca())).findFirst().orElse(null);
+                cmbIdMarca.setValue(marcaSel);
                 txtNombre.setText(newSel.getNombre());
                 txtAspecto.setText(newSel.getAspecto());
                 txtProcedimientos.setText(newSel.getProcedimientos());
@@ -99,24 +107,26 @@ public class CervezaFormController {
         // Listener para búsqueda
         cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> buscarYActualizarTabla());
         txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> buscarYActualizarTabla());
+
+        // Estado inicial de botones
+        btnGuardar.setDisable(false);
+        btnActualizar.setDisable(true);
+        btnEliminar.setDisable(true);
     }
-
-    @FXML public void onNuevo() { onLimpiar(); }
-
 
     @FXML
     public void onGuardar() {
         try {
-            Integer idMarca = cmbIdMarca.getValue();
-            if (idMarca == null) {
+            org.cerveza.cerveza.model.Marca marca = cmbIdMarca.getValue();
+            if (marca == null) {
                 showError("Selecciona una marca válida.");
                 return;
             }
+            Integer idMarca = marca.getId(); // Solo el id se guarda en la base de datos
             String nombre = txtNombre.getText().trim();
             String aspecto = txtAspecto.getText().trim();
             String proc = txtProcedimientos.getText().trim();
             Double grad = txtGraduacion.getText().isBlank() ? null : Double.parseDouble(txtGraduacion.getText());
-
 
             // Reglas adicionales
             if (grad != null && (grad < 0 || grad > 25)) {
@@ -124,6 +134,11 @@ public class CervezaFormController {
                 return;
             }
 
+            // Confirmación antes de guardar
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Está seguro de que desea guardar esta cerveza?", ButtonType.OK, ButtonType.CANCEL);
+            alert.setHeaderText("Confirmar guardado");
+            alert.setTitle("Confirmación");
+            if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
 
             Cerveza c = new Cerveza(null, idMarca, nombre, aspecto, proc, grad, null);
             dao.insert(c);
@@ -143,9 +158,9 @@ public class CervezaFormController {
             showError("Selecciona un registro para actualizar.");
             return;
         }
-        // Comprobar si hay cambios
         boolean hayCambios = false;
-        Integer idMarca = cmbIdMarca.getValue();
+        org.cerveza.cerveza.model.Marca marca = cmbIdMarca.getValue();
+        Integer idMarca = marca != null ? marca.getId() : null; // Solo el id se guarda en la base de datos
         String nombre = txtNombre.getText().trim();
         String aspecto = txtAspecto.getText().trim();
         String proc = txtProcedimientos.getText().trim();
@@ -161,8 +176,7 @@ public class CervezaFormController {
             showInfo("Sin cambios", "No hay cambios por guardar.");
             return;
         }
-        // Validaciones
-        if (idMarca == null) {
+        if (marca == null) {
             showError("Selecciona una marca válida.");
             return;
         }
@@ -174,7 +188,10 @@ public class CervezaFormController {
             showError("La graduación debe estar entre 0 y 25%");
             return;
         }
-        // Actualizar registro
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Está seguro de que desea actualizar esta cerveza?", ButtonType.OK, ButtonType.CANCEL);
+        alert.setHeaderText("Confirmar actualización");
+        alert.setTitle("Confirmación");
+        if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
         Cerveza c = new Cerveza(cervezaSeleccionada.getId(), idMarca, nombre, aspecto, proc, grad, cervezaSeleccionada.getExistenciaTotal());
         dao.update(c);
         showInfo("Actualizado", "Registro actualizado correctamente.");

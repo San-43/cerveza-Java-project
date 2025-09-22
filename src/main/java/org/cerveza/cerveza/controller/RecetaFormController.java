@@ -24,8 +24,15 @@ public class RecetaFormController {
     @FXML private TableColumn<Receta, Integer> colIngrediente;
     @FXML private TableColumn<Receta, Integer> colCantidad;
 
+    @FXML private ComboBox<String> cmbBusqueda;
+    @FXML private TextField txtBusqueda;
+    @FXML private Button btnActualizar;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnEliminar;
+
     private final RecetaDaoImpl dao = new RecetaDaoImpl();
     private Receta seleccionado;
+    private ObservableList<Receta> todasLasRecetas = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -35,14 +42,36 @@ public class RecetaFormController {
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
 
         cargarCombos();
-        refrescarTabla();
 
+        // Buscador
+        cmbBusqueda.setItems(FXCollections.observableArrayList("ID", "Cerveza", "Ingrediente", "Cantidad"));
+        cmbBusqueda.setPromptText("Elige un campo...");
+        cmbBusqueda.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+        txtBusqueda.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltroBusqueda());
+
+        // Estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
+
+        // No cargar registros al iniciar
+        tblRecetas.setItems(FXCollections.observableArrayList());
+        tblRecetas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+
+        // Selección en tabla
         tblRecetas.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             seleccionado = b;
             if (b != null) {
                 selectComboById(cboCerveza, b.getIdcerveza());
                 selectComboById(cboIngrediente, b.getIdingrediente());
                 txtCantidad.setText(b.getCantidad() == null ? "" : String.valueOf(b.getCantidad()));
+                btnActualizar.setDisable(false);
+                btnGuardar.setDisable(true);
+                btnEliminar.setDisable(false);
+            } else {
+                btnActualizar.setDisable(true);
+                btnGuardar.setDisable(false);
+                btnEliminar.setDisable(true);
             }
         });
     }
@@ -71,7 +100,46 @@ public class RecetaFormController {
     }
 
     private void refrescarTabla() {
-        tblRecetas.setItems(FXCollections.observableArrayList(dao.findAll()));
+        todasLasRecetas.setAll(dao.findAll());
+        aplicarFiltroBusqueda();
+        onNuevo();
+    }
+
+    private void aplicarFiltroBusqueda() {
+        String campo = cmbBusqueda.getValue();
+        String texto = txtBusqueda.getText();
+        if (campo == null || texto == null || texto.isBlank()) {
+            tblRecetas.setItems(FXCollections.observableArrayList());
+            tblRecetas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            return;
+        }
+        if (todasLasRecetas.isEmpty()) {
+            todasLasRecetas.setAll(dao.findAll());
+        }
+        ObservableList<Receta> resultados = FXCollections.observableArrayList();
+        for (Receta r : todasLasRecetas) {
+            switch (campo) {
+                case "ID":
+                    if (String.valueOf(r.getIdreceta()).contains(texto)) resultados.add(r);
+                    break;
+                case "Cerveza":
+                    if (String.valueOf(r.getIdcerveza()).contains(texto)) resultados.add(r);
+                    break;
+                case "Ingrediente":
+                    if (String.valueOf(r.getIdingrediente()).contains(texto)) resultados.add(r);
+                    break;
+                case "Cantidad":
+                    if (r.getCantidad() != null && String.valueOf(r.getCantidad()).contains(texto)) resultados.add(r);
+                    break;
+            }
+        }
+        if (resultados.isEmpty()) {
+            tblRecetas.setItems(FXCollections.observableArrayList());
+            tblRecetas.setPlaceholder(new Label("No se encontró en la base de datos"));
+        } else {
+            tblRecetas.setItems(resultados);
+            tblRecetas.setPlaceholder(new Label(" "));
+        }
     }
 
     @FXML
@@ -81,6 +149,11 @@ public class RecetaFormController {
         cboCerveza.getSelectionModel().clearSelection();
         cboIngrediente.getSelectionModel().clearSelection();
         txtCantidad.clear();
+        txtBusqueda.clear();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+        btnEliminar.setDisable(true);
     }
 
     @FXML
@@ -107,6 +180,30 @@ public class RecetaFormController {
     }
 
     @FXML
+    private void onActualizar() {
+        Receta sel = tblRecetas.getSelectionModel().getSelectedItem();
+        if (sel == null) { info("Selecciona una receta para actualizar", ""); return; }
+        ComboItem cerveza = cboCerveza.getSelectionModel().getSelectedItem();
+        ComboItem ing = cboIngrediente.getSelectionModel().getSelectedItem();
+        Integer cantidad = txtCantidad.getText().isBlank() ? null : Integer.parseInt(txtCantidad.getText());
+        boolean hayCambios =
+            cerveza.id != sel.getIdcerveza() ||
+            ing.id != sel.getIdingrediente() ||
+            (cantidad != null && !cantidad.equals(sel.getCantidad()));
+        if (!hayCambios) {
+            info("Sin cambios", "No hay cambios por guardar.");
+            return;
+        }
+        sel.setIdcerveza(cerveza.id);
+        sel.setIdingrediente(ing.id);
+        sel.setCantidad(cantidad);
+        dao.update(sel);
+        refrescarTabla();
+        onNuevo();
+        info("Actualizado", "Receta actualizada correctamente");
+    }
+
+    @FXML
     private void onEliminar() {
         Receta r = tblRecetas.getSelectionModel().getSelectedItem();
         if (r == null) return;
@@ -124,4 +221,6 @@ public class RecetaFormController {
             return nombre + " (ID " + id + ")";
         }
         }
+
+    private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
 }
