@@ -55,9 +55,10 @@
 
 
             <HBox alignment="CENTER_RIGHT" spacing="10">
-            <Label fx:id="cmbIdBusqueda" text="Buscar por" />
-            <ComboBox fx:id="cmbBusqueda" prefWidth="150.0" promptText="Elige un campo..." />
-            <TextField fx:id="txtBusqueda" promptText="Corona" />
+                <Label fx:id="cmbIdBusqueda" text="Buscar por" />
+                <ComboBox fx:id="cmbBusqueda" prefWidth="150.0" promptText="Elige un campo..." />
+                <TextField fx:id="txtBusqueda" promptText="Corona" />
+                <Button fx:id="btnListar" onAction="#onListar" text="Listar" />
                 <Button onAction="#onNuevo" text="Nuevo" />
                 <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar" />
                 <Button onAction="#onLimpiar" text="Limpiar" />

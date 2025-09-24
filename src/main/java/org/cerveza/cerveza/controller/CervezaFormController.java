@@ -21,7 +21,7 @@ public class CervezaFormController {
     private ComboBox<Integer> cmbIdMarca;
     @FXML private TextField txtNombre, txtAspecto, txtGraduacion;
     @FXML private TextArea txtProcedimientos;
-    @FXML private Button btnGuardar, btnActualizar, btnEliminar;
+    @FXML private Button btnGuardar, btnActualizar, btnEliminar, btnListar;
     @FXML private TableView<Cerveza> tblCervezas;
     @FXML private TableColumn<Cerveza, Integer> colId, colIdMarca;
     @FXML private TableColumn<Cerveza, String> colNombre, colAspecto;
@@ -215,6 +215,23 @@ public class CervezaFormController {
         btnActualizar.setDisable(true);
         btnEliminar.setDisable(true);
         btnGuardar.setDisable(false);
+    }
+
+
+    @FXML
+    public void onListar() {
+        try {
+            var resultados = dao.findAll();
+            tblCervezas.setItems(FXCollections.observableArrayList(resultados));
+            tblCervezas.setPlaceholder(new Label(""));
+            tblCervezas.getSelectionModel().clearSelection();
+            cervezaSeleccionada = null;
+            btnActualizar.setDisable(true);
+            btnEliminar.setDisable(true);
+            btnGuardar.setDisable(false);
+        } catch (Exception ex) {
+            showError("Error al listar: " + ex.getMessage());
+        }
     }
 
 

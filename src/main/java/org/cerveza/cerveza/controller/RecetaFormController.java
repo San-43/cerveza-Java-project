@@ -117,6 +117,12 @@ public class RecetaFormController {
         }
     }
 
+    @FXML
+    private void onListar() {
+        refrescarTabla();
+        onNuevo();
+    }
+
     // Item simple para combos
         public record ComboItem(int id, String nombre) {
         @Override

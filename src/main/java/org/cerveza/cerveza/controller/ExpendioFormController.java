@@ -113,6 +113,12 @@ public class ExpendioFormController {
         }
     }
 
+    @FXML
+    public void onListar() {
+        refrescarTabla();
+        limpiarForm();
+    }
+
     /* -------- helpers -------- */
 
     private void refrescarTabla() {
