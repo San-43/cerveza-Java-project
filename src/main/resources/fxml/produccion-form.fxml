@@ -26,6 +26,7 @@
         </GridPane>
 
         <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Listar" fx:id="btnListar" onAction="#onListar"/>
             <Button text="Nuevo"   fx:id="btnNuevo"   onAction="#onNuevo"/>
             <Button text="Guardar" fx:id="btnGuardar" onAction="#onGuardar"/>
             <Button text="Eliminar" fx:id="btnEliminar" onAction="#onEliminar"/>

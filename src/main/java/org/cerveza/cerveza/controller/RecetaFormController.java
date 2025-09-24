@@ -33,6 +33,8 @@ public class RecetaFormController {
     private final RecetaDaoImpl dao = new RecetaDaoImpl();
     private Receta seleccionado;
     private ObservableList<Receta> todasLasRecetas = FXCollections.observableArrayList();
+    private final ObservableList<Receta> recetasEnTabla = FXCollections.observableArrayList();
+    private boolean listaCompletaCargada = false;
 
     @FXML
     public void initialize() {
@@ -55,8 +57,8 @@ public class RecetaFormController {
         btnEliminar.setDisable(true);
 
         // No cargar registros al iniciar
-        tblRecetas.setItems(FXCollections.observableArrayList());
-        tblRecetas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblRecetas.setItems(recetasEnTabla);
+        actualizarPlaceholder();
 
         // Selección en tabla
         tblRecetas.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
@@ -101,6 +103,10 @@ public class RecetaFormController {
 
     private void refrescarTabla() {
         todasLasRecetas.setAll(dao.findAll());
+        if (listaCompletaCargada) {
+            recetasEnTabla.setAll(todasLasRecetas);
+            actualizarPlaceholder();
+        }
         aplicarFiltroBusqueda();
         onNuevo();
     }
@@ -109,8 +115,13 @@ public class RecetaFormController {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblRecetas.setItems(FXCollections.observableArrayList());
-            tblRecetas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                recetasEnTabla.setAll(todasLasRecetas);
+                actualizarPlaceholder();
+            } else {
+                recetasEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         if (todasLasRecetas.isEmpty()) {
@@ -133,11 +144,10 @@ public class RecetaFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblRecetas.setItems(FXCollections.observableArrayList());
+        recetasEnTabla.setAll(resultados);
+        if (recetasEnTabla.isEmpty()) {
             tblRecetas.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblRecetas.setItems(resultados);
             tblRecetas.setPlaceholder(new Label(" "));
         }
     }
@@ -154,6 +164,17 @@ public class RecetaFormController {
         btnActualizar.setDisable(true);
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
+    }
+
+    @FXML
+    private void onListar() {
+        todasLasRecetas.setAll(dao.findAll());
+        listaCompletaCargada = true;
+        recetasEnTabla.setAll(todasLasRecetas);
+        actualizarPlaceholder();
+        tblRecetas.getSelectionModel().clearSelection();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
     }
 
     @FXML
@@ -223,4 +244,14 @@ public class RecetaFormController {
         }
 
     private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
+
+    private void actualizarPlaceholder() {
+        if (!recetasEnTabla.isEmpty()) {
+            tblRecetas.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblRecetas.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblRecetas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
+    }
 }

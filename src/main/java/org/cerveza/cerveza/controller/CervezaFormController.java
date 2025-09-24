@@ -2,6 +2,7 @@ package org.cerveza.cerveza.controller;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -13,6 +14,8 @@ import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class CervezaFormController {
@@ -33,6 +36,9 @@ public class CervezaFormController {
     private final CervezaDao dao = new CervezaDaoImpl();
     private final org.cerveza.cerveza.dao.MarcaDao marcaDao = new org.cerveza.cerveza.dao.impl.MarcaDaoImpl();
     private final ValidationSupport vs = new ValidationSupport();
+    private final ObservableList<Cerveza> cervezasEnTabla = FXCollections.observableArrayList();
+    private List<Cerveza> cacheCompleta = new ArrayList<>();
+    private boolean listaCompletaCargada = false;
     private Cerveza cervezaSeleccionada = null;
 
     @FXML
@@ -45,8 +51,8 @@ public class CervezaFormController {
         colGraduacion.setCellValueFactory(new PropertyValueFactory<>("graduacion"));
         colExistenciaTotal.setCellValueFactory(new PropertyValueFactory<>("existenciaTotal"));
         // No cargar registros al iniciar
-        tblCervezas.setItems(FXCollections.observableArrayList());
-        tblCervezas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblCervezas.setItems(cervezasEnTabla);
+        actualizarPlaceholder();
 
         // Poblar ComboBox de marcas con id y nombre
         var marcas = marcaDao.findAll();
@@ -236,16 +242,27 @@ public class CervezaFormController {
 
 
     private void refreshTable() {
-        // No cargar registros por defecto
-        tblCervezas.setItems(FXCollections.observableArrayList());
-        tblCervezas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        if (listaCompletaCargada) {
+            cacheCompleta = dao.findAll();
+            cervezasEnTabla.setAll(cacheCompleta);
+            actualizarPlaceholder();
+        } else {
+            cervezasEnTabla.clear();
+            actualizarPlaceholder();
+        }
     }
 
     private void buscarYActualizarTabla() {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            refreshTable();
+            if (listaCompletaCargada) {
+                cervezasEnTabla.setAll(cacheCompleta);
+                actualizarPlaceholder();
+            } else {
+                cervezasEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         java.util.List<Cerveza> resultados = java.util.Collections.emptyList();
@@ -262,12 +279,26 @@ public class CervezaFormController {
             resultados = java.util.Collections.emptyList();
         }
 
-        if (resultados == null || resultados.isEmpty()) {
-            tblCervezas.setItems(FXCollections.observableArrayList());
+        cervezasEnTabla.setAll(resultados == null ? java.util.Collections.emptyList() : resultados);
+        if (cervezasEnTabla.isEmpty()) {
             tblCervezas.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblCervezas.setItems(FXCollections.observableArrayList(resultados));
             tblCervezas.setPlaceholder(new Label(""));
+        }
+    }
+
+    @FXML
+    private void onListar() {
+        cacheCompleta = dao.findAll();
+        listaCompletaCargada = true;
+        cervezasEnTabla.setAll(cacheCompleta);
+        actualizarPlaceholder();
+        tblCervezas.getSelectionModel().clearSelection();
+        if (cmbBusqueda != null) {
+            cmbBusqueda.getSelectionModel().clearSelection();
+        }
+        if (txtBusqueda != null) {
+            txtBusqueda.clear();
         }
     }
 
@@ -279,5 +310,15 @@ public class CervezaFormController {
     private void showError(String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setHeaderText("Validación"); a.setContentText(msg); a.showAndWait();
+    }
+
+    private void actualizarPlaceholder() {
+        if (!cervezasEnTabla.isEmpty()) {
+            tblCervezas.setPlaceholder(new Label(""));
+        } else if (listaCompletaCargada) {
+            tblCervezas.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblCervezas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
     }
 }

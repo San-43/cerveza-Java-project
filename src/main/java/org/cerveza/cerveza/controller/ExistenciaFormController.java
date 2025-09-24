@@ -37,6 +37,8 @@ public class ExistenciaFormController {
     private final ExistenciaDao dao = new ExistenciaDaoImpl();
     private Existencia seleccionado;
     private ObservableList<Existencia> todasLasExistencias = FXCollections.observableArrayList();
+    private final ObservableList<Existencia> existenciasEnTabla = FXCollections.observableArrayList();
+    private boolean listaCompletaCargada = false;
 
     @FXML
     private void initialize() {
@@ -59,8 +61,8 @@ public class ExistenciaFormController {
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
         // No cargar registros al iniciar
-        tblExistencias.setItems(FXCollections.observableArrayList());
-        tblExistencias.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblExistencias.setItems(existenciasEnTabla);
+        actualizarPlaceholder();
         // Selección en tabla
         tblExistencias.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             seleccionado = b;
@@ -198,6 +200,10 @@ public class ExistenciaFormController {
     private void error(String m) { Alert a = new Alert(Alert.AlertType.ERROR); a.setHeaderText("Validación"); a.setContentText(m); a.showAndWait(); }
     private void refrescarTabla() {
         todasLasExistencias.setAll(dao.findAllWithLabels());
+        if (listaCompletaCargada) {
+            existenciasEnTabla.setAll(todasLasExistencias);
+            actualizarPlaceholder();
+        }
         aplicarFiltroBusqueda();
         limpiar();
     }
@@ -205,8 +211,13 @@ public class ExistenciaFormController {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblExistencias.setItems(FXCollections.observableArrayList());
-            tblExistencias.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                existenciasEnTabla.setAll(todasLasExistencias);
+                actualizarPlaceholder();
+            } else {
+                existenciasEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         if (todasLasExistencias.isEmpty()) {
@@ -232,11 +243,10 @@ public class ExistenciaFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblExistencias.setItems(FXCollections.observableArrayList());
+        existenciasEnTabla.setAll(resultados);
+        if (existenciasEnTabla.isEmpty()) {
             tblExistencias.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblExistencias.setItems(resultados);
             tblExistencias.setPlaceholder(new Label(" "));
         }
     }
@@ -253,6 +263,26 @@ public class ExistenciaFormController {
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
     }
+    @FXML
+    private void onListar() {
+        todasLasExistencias.setAll(dao.findAllWithLabels());
+        listaCompletaCargada = true;
+        existenciasEnTabla.setAll(todasLasExistencias);
+        actualizarPlaceholder();
+        tblExistencias.getSelectionModel().clearSelection();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
+    }
     // record simple para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
+
+    private void actualizarPlaceholder() {
+        if (!existenciasEnTabla.isEmpty()) {
+            tblExistencias.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblExistencias.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblExistencias.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
+    }
 }
