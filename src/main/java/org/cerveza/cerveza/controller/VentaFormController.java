@@ -36,6 +36,8 @@ public class VentaFormController {
     private final VentaDaoImpl dao = new VentaDaoImpl();
     private Venta seleccionado;
     private javafx.collections.ObservableList<Venta> todasLasVentas = FXCollections.observableArrayList();
+    private final javafx.collections.ObservableList<Venta> ventasEnTabla = FXCollections.observableArrayList();
+    private boolean listaCompletaCargada = false;
 
     @FXML
     public void initialize() {
@@ -55,8 +57,8 @@ public class VentaFormController {
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
         // No cargar registros al iniciar
-        tblVentas.setItems(FXCollections.observableArrayList());
-        tblVentas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblVentas.setItems(ventasEnTabla);
+        actualizarPlaceholder();
         // Selección en tabla
         tblVentas.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
             seleccionado = sel;
@@ -112,6 +114,10 @@ public class VentaFormController {
 
     private void refrescarTabla() {
         todasLasVentas.setAll(dao.findAll());
+        if (listaCompletaCargada) {
+            ventasEnTabla.setAll(todasLasVentas);
+            actualizarPlaceholder();
+        }
         aplicarFiltroBusqueda();
         onNuevo();
     }
@@ -119,8 +125,13 @@ public class VentaFormController {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblVentas.setItems(FXCollections.observableArrayList());
-            tblVentas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                ventasEnTabla.setAll(todasLasVentas);
+                actualizarPlaceholder();
+            } else {
+                ventasEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         if (todasLasVentas.isEmpty()) {
@@ -146,11 +157,10 @@ public class VentaFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblVentas.setItems(FXCollections.observableArrayList());
+        ventasEnTabla.setAll(resultados);
+        if (ventasEnTabla.isEmpty()) {
             tblVentas.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblVentas.setItems(resultados);
             tblVentas.setPlaceholder(new Label(" "));
         }
     }
@@ -167,6 +177,16 @@ public class VentaFormController {
         btnActualizar.setDisable(true);
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
+    }
+    @FXML
+    private void onListar() {
+        todasLasVentas.setAll(dao.findAll());
+        listaCompletaCargada = true;
+        ventasEnTabla.setAll(todasLasVentas);
+        actualizarPlaceholder();
+        tblVentas.getSelectionModel().clearSelection();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
     }
     @FXML
     private void onGuardar() {
@@ -239,5 +259,15 @@ public class VentaFormController {
         public final int id; public final String nombre;
         public ComboItem(int id, String nombre) { this.id = id; this.nombre = nombre; }
         @Override public String toString() { return nombre + " (ID " + id + ")"; }
+    }
+
+    private void actualizarPlaceholder() {
+        if (!ventasEnTabla.isEmpty()) {
+            tblVentas.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblVentas.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblVentas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
     }
 }

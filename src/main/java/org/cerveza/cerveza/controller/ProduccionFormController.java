@@ -55,6 +55,7 @@ public class ProduccionFormController {
 
         cargarCervezas();
         refrescarTabla();
+        actualizarPlaceholder();
 
         // Al seleccionar fila, poblar formulario
         tblProduccion.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
@@ -136,9 +137,16 @@ public class ProduccionFormController {
     private void refrescarTabla() {
         try {
             data.setAll(dao.findAll());
+            actualizarPlaceholder();
         } catch (Exception ex) {
             error("No se pudo cargar Producción", ex.getMessage());
         }
+    }
+
+    @FXML
+    private void onListar() {
+        refrescarTabla();
+        actualizarPlaceholder();
     }
 
     private void cargarCervezas() {
@@ -167,6 +175,14 @@ public class ProduccionFormController {
         a.setHeaderText(header);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private void actualizarPlaceholder() {
+        if (data.isEmpty()) {
+            tblProduccion.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblProduccion.setPlaceholder(new Label(""));
+        }
     }
 
     private boolean confirm(String msg) {

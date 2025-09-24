@@ -2,6 +2,7 @@ package org.cerveza.cerveza.controller;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -31,6 +32,8 @@ public class MarcaFormController {
     private final ValidationSupport vs = new ValidationSupport();
     private Integer editingId = null;
     private java.util.List<Marca> todasLasMarcas = new java.util.ArrayList<>();
+    private final ObservableList<Marca> marcasEnTabla = FXCollections.observableArrayList();
+    private boolean listaCompletaCargada = false;
 
     @FXML
     public void initialize() {
@@ -84,8 +87,8 @@ public class MarcaFormController {
             }
         });
         // No cargar registros al iniciar
-        tblMarcas.setItems(FXCollections.observableArrayList());
-        tblMarcas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblMarcas.setItems(marcasEnTabla);
+        actualizarPlaceholder();
     }
 
     @FXML public void onNuevo() { clearForm(); }
@@ -156,13 +159,22 @@ public class MarcaFormController {
 
     private void refreshTable() {
         todasLasMarcas = dao.findAll();
+        if (listaCompletaCargada) {
+            marcasEnTabla.setAll(todasLasMarcas);
+            actualizarPlaceholder();
+        }
     }
     private void aplicarFiltroBusqueda() {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblMarcas.setItems(FXCollections.observableArrayList());
-            tblMarcas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                marcasEnTabla.setAll(todasLasMarcas);
+                actualizarPlaceholder();
+            } else {
+                marcasEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         if (todasLasMarcas == null || todasLasMarcas.isEmpty()) {
@@ -185,11 +197,10 @@ public class MarcaFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblMarcas.setItems(FXCollections.observableArrayList());
+        marcasEnTabla.setAll(resultados);
+        if (marcasEnTabla.isEmpty()) {
             tblMarcas.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblMarcas.setItems(FXCollections.observableArrayList(resultados));
             tblMarcas.setPlaceholder(new Label(" "));
         }
     }
@@ -204,6 +215,25 @@ public class MarcaFormController {
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
     }
+    @FXML
+    private void onListar() {
+        todasLasMarcas = dao.findAll();
+        listaCompletaCargada = true;
+        marcasEnTabla.setAll(todasLasMarcas);
+        actualizarPlaceholder();
+        tblMarcas.getSelectionModel().clearSelection();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
+    }
     private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
     private void error(String m) { Alert a = new Alert(Alert.AlertType.ERROR); a.setHeaderText("Validación"); a.setContentText(m); a.showAndWait(); }
+    private void actualizarPlaceholder() {
+        if (!marcasEnTabla.isEmpty()) {
+            tblMarcas.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblMarcas.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblMarcas.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
+    }
 }

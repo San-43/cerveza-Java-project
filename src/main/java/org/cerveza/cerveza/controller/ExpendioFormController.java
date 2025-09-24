@@ -35,6 +35,7 @@ public class ExpendioFormController {
     private final ObservableList<Expendio> data = FXCollections.observableArrayList();
     private java.util.List<Expendio> todosLosExpendios = new java.util.ArrayList<>();
     private Expendio expendioSeleccionado = null;
+    private boolean listaCompletaCargada = false;
 
     @FXML
     public void initialize() {
@@ -71,8 +72,8 @@ public class ExpendioFormController {
             }
         });
         // No cargar registros al iniciar
-        tblExpendios.setItems(FXCollections.observableArrayList());
-        tblExpendios.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        data.clear();
+        actualizarPlaceholder();
     }
 
     @FXML
@@ -171,6 +172,10 @@ public class ExpendioFormController {
     private void refrescarTabla() {
         try {
             todosLosExpendios = dao.findAll();
+            if (listaCompletaCargada) {
+                data.setAll(todosLosExpendios);
+                actualizarPlaceholder();
+            }
         } catch (Exception ex) {
             error("No se pudieron cargar los expendios", ex.getMessage());
             todosLosExpendios = new java.util.ArrayList<>();
@@ -180,11 +185,18 @@ public class ExpendioFormController {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblExpendios.setItems(FXCollections.observableArrayList());
-            tblExpendios.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                data.setAll(todosLosExpendios);
+                actualizarPlaceholder();
+            } else {
+                data.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
-        refrescarTabla();
+        if (todosLosExpendios == null || todosLosExpendios.isEmpty()) {
+            refrescarTabla();
+        }
         java.util.List<Expendio> resultados = new java.util.ArrayList<>();
         for (Expendio e : todosLosExpendios) {
             switch (campo) {
@@ -205,11 +217,10 @@ public class ExpendioFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblExpendios.setItems(FXCollections.observableArrayList());
+        data.setAll(resultados);
+        if (data.isEmpty()) {
             tblExpendios.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblExpendios.setItems(FXCollections.observableArrayList(resultados));
             tblExpendios.setPlaceholder(new Label(" "));
         }
     }
@@ -224,6 +235,20 @@ public class ExpendioFormController {
         btnActualizar.setDisable(true);
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
+    }
+    @FXML
+    private void onListar() {
+        try {
+            todosLosExpendios = dao.findAll();
+            listaCompletaCargada = true;
+            data.setAll(todosLosExpendios);
+            actualizarPlaceholder();
+            tblExpendios.getSelectionModel().clearSelection();
+            cmbBusqueda.getSelectionModel().clearSelection();
+            txtBusqueda.clear();
+        } catch (Exception ex) {
+            error("No se pudieron cargar los expendios", ex.getMessage());
+        }
     }
     private void error(String header, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
@@ -241,4 +266,13 @@ public class ExpendioFormController {
     private static String safe(String s) { return s == null ? "" : s.trim(); }
     private static String nullToEmpty(String s) { return s == null ? "" : s; }
     private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
+    private void actualizarPlaceholder() {
+        if (!data.isEmpty()) {
+            tblExpendios.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblExpendios.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblExpendios.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
+    }
 }

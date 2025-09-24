@@ -29,6 +29,8 @@ public class PresentacionFormController {
     private final PresentacionDao dao = new PresentacionDaoImpl();
     private Presentacion seleccionado;
     private ObservableList<Presentacion> todasLasPresentaciones = FXCollections.observableArrayList();
+    private final ObservableList<Presentacion> presentacionesEnTabla = FXCollections.observableArrayList();
+    private boolean listaCompletaCargada = false;
 
     @FXML
     private void initialize() {
@@ -48,8 +50,8 @@ public class PresentacionFormController {
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
         // No cargar registros al iniciar
-        tblPresentaciones.setItems(FXCollections.observableArrayList());
-        tblPresentaciones.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        tblPresentaciones.setItems(presentacionesEnTabla);
+        actualizarPlaceholder();
         // Selección en tabla
         tblPresentaciones.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             seleccionado = b;
@@ -88,6 +90,10 @@ public class PresentacionFormController {
 
     private void refrescarTabla() {
         todasLasPresentaciones.setAll(dao.findAllWithLabels());
+        if (listaCompletaCargada) {
+            presentacionesEnTabla.setAll(todasLasPresentaciones);
+            actualizarPlaceholder();
+        }
         aplicarFiltroBusqueda();
         onNuevo();
     }
@@ -95,8 +101,13 @@ public class PresentacionFormController {
         String campo = cmbBusqueda.getValue();
         String texto = txtBusqueda.getText();
         if (campo == null || texto == null || texto.isBlank()) {
-            tblPresentaciones.setItems(FXCollections.observableArrayList());
-            tblPresentaciones.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+            if (listaCompletaCargada) {
+                presentacionesEnTabla.setAll(todasLasPresentaciones);
+                actualizarPlaceholder();
+            } else {
+                presentacionesEnTabla.clear();
+                actualizarPlaceholder();
+            }
             return;
         }
         if (todasLasPresentaciones.isEmpty()) {
@@ -116,11 +127,10 @@ public class PresentacionFormController {
                     break;
             }
         }
-        if (resultados.isEmpty()) {
-            tblPresentaciones.setItems(FXCollections.observableArrayList());
+        presentacionesEnTabla.setAll(resultados);
+        if (presentacionesEnTabla.isEmpty()) {
             tblPresentaciones.setPlaceholder(new Label("No se encontró en la base de datos"));
         } else {
-            tblPresentaciones.setItems(resultados);
             tblPresentaciones.setPlaceholder(new Label(" "));
         }
     }
@@ -135,6 +145,16 @@ public class PresentacionFormController {
         btnActualizar.setDisable(true);
         btnGuardar.setDisable(false);
         btnEliminar.setDisable(true);
+    }
+    @FXML
+    private void onListar() {
+        todasLasPresentaciones.setAll(dao.findAllWithLabels());
+        listaCompletaCargada = true;
+        presentacionesEnTabla.setAll(todasLasPresentaciones);
+        actualizarPlaceholder();
+        tblPresentaciones.getSelectionModel().clearSelection();
+        cmbBusqueda.getSelectionModel().clearSelection();
+        txtBusqueda.clear();
     }
 
     @FXML
@@ -197,6 +217,16 @@ public class PresentacionFormController {
 
     // pequeño record para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
+
+    private void actualizarPlaceholder() {
+        if (!presentacionesEnTabla.isEmpty()) {
+            tblPresentaciones.setPlaceholder(new Label(" "));
+        } else if (listaCompletaCargada) {
+            tblPresentaciones.setPlaceholder(new Label("No hay registros disponibles"));
+        } else {
+            tblPresentaciones.setPlaceholder(new Label("Realiza una búsqueda para ver resultados"));
+        }
+    }
 
     private void info(String h, String m) { Alert a = new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(h); a.setContentText(m); a.showAndWait(); }
 }
