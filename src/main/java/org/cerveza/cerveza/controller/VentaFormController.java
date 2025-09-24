@@ -141,4 +141,10 @@ public class VentaFormController {
         public ComboItem(int id, String nombre) { this.id = id; this.nombre = nombre; }
         @Override public String toString() { return nombre + " (ID " + id + ")"; }
     }
+
+    @FXML
+    private void onListar() {
+        refrescarTabla();
+        onNuevo();
+    }
 }

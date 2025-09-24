@@ -124,6 +124,12 @@ public class ProduccionFormController {
         }
     }
 
+    @FXML
+    public void onListar() {
+        refrescarTabla();
+        limpiarForm();
+    }
+
     /* -------------------- helpers -------------------- */
 
     private void limpiarForm() {

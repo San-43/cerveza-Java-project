@@ -86,6 +86,12 @@ public class EnvaseFormController {
         } catch (Exception e) { error("No se pudo eliminar: " + e.getMessage()); }
     }
 
+    @FXML
+    public void onListar() {
+        refreshTable();
+        clearForm();
+    }
+
     private void refreshTable() { tblEnvases.setItems(FXCollections.observableArrayList(dao.findAll())); }
     private void clearForm() {
         editingId = null;
