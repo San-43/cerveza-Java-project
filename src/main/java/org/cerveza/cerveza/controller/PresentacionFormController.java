@@ -115,4 +115,9 @@ public class PresentacionFormController {
 
     // pequeño record para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
+
+    @FXML
+    private void onListar() {
+        refrescarTabla();
+    }
 }

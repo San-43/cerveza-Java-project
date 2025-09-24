@@ -148,4 +148,9 @@ public class ExistenciaFormController {
     private void error(String m) { Alert a = new Alert(Alert.AlertType.ERROR); a.setHeaderText("Validación"); a.setContentText(m); a.showAndWait(); }
     // record simple para combos
     public record IdName(int id, String name) { @Override public String toString(){ return name; } }
+
+    @FXML
+    private void onListar() {
+        refrescarTabla();
+    }
 }

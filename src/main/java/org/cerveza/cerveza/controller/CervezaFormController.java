@@ -218,6 +218,23 @@ public class CervezaFormController {
     }
 
 
+    @FXML
+    public void onListar() {
+        try {
+            var resultados = dao.findAll();
+            tblCervezas.setItems(FXCollections.observableArrayList(resultados));
+            tblCervezas.setPlaceholder(new Label(""));
+            tblCervezas.getSelectionModel().clearSelection();
+            cervezaSeleccionada = null;
+            btnActualizar.setDisable(true);
+            btnEliminar.setDisable(true);
+            btnGuardar.setDisable(false);
+        } catch (Exception ex) {
+            showError("Error al listar: " + ex.getMessage());
+        }
+    }
+
+
     private void refreshTable() {
         // No cargar registros por defecto
         tblCervezas.setItems(FXCollections.observableArrayList());

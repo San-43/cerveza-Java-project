@@ -81,6 +81,12 @@ public class MarcaFormController {
         } catch (Exception e) { error("No se pudo eliminar: " + e.getMessage()); }
     }
 
+    @FXML
+    public void onListar() {
+        refreshTable();
+        clearForm();
+    }
+
     private void refreshTable() { tblMarcas.setItems(FXCollections.observableArrayList(dao.findAll())); }
     private void clearForm() {
         editingId = null;
